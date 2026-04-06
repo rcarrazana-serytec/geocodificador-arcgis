@@ -3,176 +3,852 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SER&TEC — Geoprocesamiento Offline</title>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-  <link rel="stylesheet" href="sertec-brand.css">
-</head>
-<body class="st-pagina">
+  <title>Geocodificador Híbrido — SER&TEC</title>
 
+  <!-- Fuentes de marca -->
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Design System SER&TEC -->
+  <style>
+    /* ============================================================
+       SER&TEC SAS — Design System v1.0
+       ============================================================ */
+
+    :root {
+      /* Colores primarios */
+      --st-amarillo:        #E6A817;
+      --st-gris:            #7A7A7A;
+      --st-blanco:          #FFFFFF;
+
+      /* Variantes */
+      --st-amarillo-claro:  #F5C842;
+      --st-amarillo-oscuro: #C08A0E;
+      --st-amarillo-tenue:  rgba(230,168,23,0.12);
+      --st-amarillo-borde:  rgba(230,168,23,0.35);
+
+      --st-gris-oscuro:     #4A4A4A;
+      --st-gris-medio:      #7A7A7A;
+      --st-gris-claro:      #C4C4C4;
+      --st-gris-fondo:      #F4F4F4;
+      --st-gris-superficie: #EBEBEB;
+
+      /* Semánticos */
+      --st-exito:           #2E8B57;
+      --st-error:           #C0392B;
+      --st-advertencia:     #E6A817;
+      --st-info:            #2E6DA4;
+
+      /* Tipografía */
+      --st-font-titulo: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+      --st-font-cuerpo: 'Barlow', 'Helvetica Neue', Arial, sans-serif;
+      --st-font-mono:   'IBM Plex Mono', 'Courier New', monospace;
+
+      /* Escala tipográfica */
+      --st-text-xs:    11px;
+      --st-text-sm:    13px;
+      --st-text-base:  15px;
+      --st-text-md:    17px;
+      --st-text-lg:    20px;
+      --st-text-xl:    24px;
+      --st-text-2xl:   32px;
+      --st-text-3xl:   42px;
+
+      /* Espaciado */
+      --st-space-xs:  4px;
+      --st-space-sm:  8px;
+      --st-space-md:  16px;
+      --st-space-lg:  24px;
+      --st-space-xl:  40px;
+      --st-space-2xl: 64px;
+
+      /* Bordes y sombras */
+      --st-radius-sm:   3px;
+      --st-radius-md:   6px;
+      --st-radius-lg:   10px;
+      --st-radius-pill: 999px;
+      --st-sombra-sm:   0 1px 4px rgba(0,0,0,0.08);
+      --st-sombra-md:   0 3px 12px rgba(0,0,0,0.10);
+      --st-sombra-lg:   0 8px 32px rgba(0,0,0,0.12);
+      --st-trans:       0.18s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      background: var(--st-gris-fondo);
+      color: var(--st-gris-oscuro);
+      font-family: var(--st-font-cuerpo);
+      font-size: var(--st-text-base);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1,h2,h3,h4,h5,h6 {
+      font-family: var(--st-font-titulo);
+      font-weight: 700;
+      color: var(--st-gris-oscuro);
+      line-height: 1.15;
+      letter-spacing: 0.5px;
+    }
+    h1 { font-size: var(--st-text-3xl); }
+    h2 { font-size: var(--st-text-2xl); }
+    h3 { font-size: var(--st-text-xl);  }
+
+    .st-label {
+      font-size: var(--st-text-xs); font-weight: 600;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--st-gris-medio);
+    }
+    .st-label--gold { color: var(--st-amarillo); }
+
+    /* NAVBAR */
+    .st-navbar {
+      background: var(--st-blanco);
+      border-bottom: 1px solid var(--st-gris-claro);
+      padding: var(--st-space-md) var(--st-space-lg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--st-sombra-sm);
+    }
+    .st-navbar__logo {
+      display: flex; align-items: center; gap: var(--st-space-md);
+      font-weight: 700; font-size: var(--st-text-lg);
+    }
+    .st-navbar__logo img { height: 32px; }
+    .st-navbar__tool-name { color: var(--st-gris-oscuro); }
+    .st-navbar__actions { display: flex; gap: var(--st-space-sm); }
+
+    /* PAGE */
+    .st-page { padding: var(--st-space-2xl) 0; min-height: calc(100vh - 80px); }
+    .st-container { max-width: 1200px; margin: 0 auto; padding: 0 var(--st-space-lg); }
+
+    /* SECTION */
+    .st-section { margin-bottom: var(--st-space-2xl); }
+    .st-section__header { margin-bottom: var(--st-space-lg); }
+
+    /* GRID */
+    .st-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--st-space-lg);
+    }
+
+    /* CARD */
+    .st-card {
+      background: var(--st-blanco);
+      border: 1px solid var(--st-gris-claro);
+      border-radius: var(--st-radius-lg);
+      box-shadow: var(--st-sombra-sm);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: all var(--st-trans);
+    }
+    .st-card:hover { box-shadow: var(--st-sombra-md); }
+    .st-card--accent { background: var(--st-amarillo-tenue); border-color: var(--st-amarillo-borde); border-width: 2px; }
+    .st-card__header {
+      padding: var(--st-space-lg);
+      border-bottom: 1px solid var(--st-gris-claro);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .st-card__title { font-size: var(--st-text-lg); font-weight: 700; color: var(--st-gris-oscuro); }
+    .st-card__body { padding: var(--st-space-lg); flex: 1; }
+    .st-card__footer {
+      padding: var(--st-space-lg);
+      border-top: 1px solid var(--st-gris-claro);
+      display: flex;
+      gap: var(--st-space-sm);
+      justify-content: flex-end;
+    }
+
+    /* BUTTONS */
+    .st-btn {
+      padding: 10px 20px;
+      border: 1px solid var(--st-gris-claro);
+      border-radius: var(--st-radius-md);
+      background: var(--st-blanco);
+      color: var(--st-gris-oscuro);
+      font-family: var(--st-font-cuerpo);
+      font-size: var(--st-text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--st-trans);
+    }
+    .st-btn:hover { border-color: var(--st-gris-oscuro); }
+    .st-btn--primary {
+      background: var(--st-amarillo);
+      color: var(--st-blanco);
+      border-color: var(--st-amarillo);
+    }
+    .st-btn--primary:hover { background: var(--st-amarillo-oscuro); border-color: var(--st-amarillo-oscuro); }
+    .st-btn--ghost { background: transparent; border-color: transparent; }
+    .st-btn--sm { padding: 8px 16px; font-size: var(--st-text-xs); }
+    .st-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* FORM */
+    .st-form-group {
+      margin-bottom: var(--st-space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--st-space-sm);
+    }
+    .st-label-form {
+      font-size: var(--st-text-sm);
+      font-weight: 600;
+      color: var(--st-gris-oscuro);
+    }
+    .st-label-form--required::after { content: ' *'; color: var(--st-error); }
+    .st-input, .st-select, .st-textarea {
+      padding: 10px 12px;
+      border: 1px solid var(--st-gris-claro);
+      border-radius: var(--st-radius-md);
+      font-family: var(--st-font-cuerpo);
+      font-size: var(--st-text-sm);
+      color: var(--st-gris-oscuro);
+    }
+    .st-input:focus, .st-select:focus, .st-textarea:focus {
+      outline: none;
+      border-color: var(--st-amarillo);
+      box-shadow: 0 0 0 3px var(--st-amarillo-tenue);
+    }
+    .st-helper-text { font-size: var(--st-text-xs); color: var(--st-gris-medio); }
+    .st-checkbox { display: flex; align-items: center; gap: var(--st-space-sm); cursor: pointer; font-size: var(--st-text-sm); }
+    .st-checkbox input { cursor: pointer; }
+
+    /* UPLOAD */
+    .st-upload {
+      border: 2px dashed var(--st-amarillo-borde);
+      border-radius: var(--st-radius-lg);
+      padding: var(--st-space-xl);
+      text-align: center;
+      background: var(--st-amarillo-tenue);
+      cursor: pointer;
+      transition: all var(--st-trans);
+    }
+    .st-upload:hover { border-color: var(--st-amarillo); background: rgba(230,168,23,0.18); }
+    .st-upload__icon { color: var(--st-amarillo); margin-bottom: var(--st-space-md); }
+    .st-upload__title { font-size: var(--st-text-lg); font-weight: 700; color: var(--st-gris-oscuro); margin-bottom: var(--st-space-sm); }
+    .st-upload__sub { font-size: var(--st-text-sm); color: var(--st-gris-medio); }
+
+    /* BADGE */
+    .st-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: var(--st-radius-pill);
+      font-size: var(--st-text-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .st-badge--gold { background: var(--st-amarillo-tenue); color: var(--st-amarillo-oscuro); }
+    .st-badge--gray { background: var(--st-gris-fondo); color: var(--st-gris-medio); }
+    .st-badge--success { background: rgba(46,139,87,0.12); color: var(--st-exito); }
+    .st-badge--info { background: rgba(46,109,164,0.12); color: var(--st-info); }
+    .st-badge--danger { background: rgba(192,57,43,0.12); color: var(--st-error); }
+
+    /* TABLE */
+    .st-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--st-text-sm);
+    }
+    .st-table thead {
+      background: var(--st-gris-fondo);
+      border-bottom: 2px solid var(--st-gris-claro);
+    }
+    .st-table th {
+      padding: 12px;
+      text-align: left;
+      font-weight: 700;
+      color: var(--st-gris-oscuro);
+    }
+    .st-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--st-gris-claro);
+    }
+    .st-table tbody tr:hover { background: var(--st-gris-fondo); }
+
+    /* PROGRESS */
+    .st-progress {
+      width: 100%;
+      height: 8px;
+      background: var(--st-gris-claro);
+      border-radius: var(--st-radius-pill);
+      overflow: hidden;
+    }
+    .st-progress__bar {
+      height: 100%;
+      background: var(--st-amarillo);
+      transition: width 0.3s ease;
+    }
+
+    /* ALERT */
+    .st-alert {
+      padding: var(--st-space-md);
+      border-radius: var(--st-radius-md);
+      border-left: 4px solid var(--st-info);
+      font-size: var(--st-text-sm);
+      line-height: 1.5;
+    }
+    .st-alert--success { background: rgba(46,139,87,0.08); color: var(--st-exito); border-color: var(--st-exito); }
+    .st-alert--warning { background: rgba(230,168,23,0.08); color: var(--st-advertencia); border-color: var(--st-advertencia); }
+    .st-alert--danger { background: rgba(192,57,43,0.08); color: var(--st-error); border-color: var(--st-error); }
+    .st-alert--info { background: rgba(46,109,164,0.08); color: var(--st-info); border-color: var(--st-info); }
+
+    /* FOOTER */
+    .st-footer {
+      background: var(--st-gris-oscuro);
+      color: var(--st-blanco);
+      padding: var(--st-space-lg);
+      text-align: center;
+      margin-top: var(--st-space-2xl);
+      font-size: var(--st-text-sm);
+      display: flex;
+      flex-direction: column;
+      gap: var(--st-space-md);
+    }
+    .st-footer__brand { font-size: var(--st-text-lg); font-weight: 700; }
+    .st-ampersand { color: var(--st-amarillo); font-weight: 300; }
+    .st-footer__copy { opacity: 0.8; }
+
+    /* CUSTOM */
+    .hidden { display: none; }
+    .st-table-wrapper { overflow-x: auto; max-height: 600px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
   <nav class="st-navbar">
-    <div class="st-navbar-logo">
-      <img src="LogoST.png" alt="Ser&Tec logo" onerror="this.style.display='none'">
-      <span class="st-navbar-nombre">SER<span class="st-amp">&</span>TEC<span class="st-sas">SAS</span></span>
+    <div class="st-navbar__logo">
+      <span style="font-size: 24px;">🗺️</span>
+      <span class="st-navbar__tool-name">Geocodificador Híbrido</span>
     </div>
-    <div class="st-navbar-herramienta">Geocodificador Autónomo</div>
+    <div class="st-navbar__actions">
+      <button class="st-btn st-btn--primary st-btn--sm" onclick="alert('Soporte técnico en desarrollo')">Ayuda</button>
+    </div>
   </nav>
 
-  <main class="st-contenedor">
-    <section class="st-seccion">
-      <p class="st-label-amarillo">Infraestructura · Georreferenciación NOA</p>
-      <h1>Procesador de Datos</h1>
-      <p class="st-texto-secundario">Herramienta para normalizar coordenadas REAP y OML sin depender de servidores externos.</p>
-    </section>
+  <!-- MAIN -->
+  <main class="st-page">
+    <div class="st-container">
 
-    <div class="st-grid-2">
-      <div class="st-card st-card-accent">
-        <h3 class="st-card-titulo">1. Cargar Archivo</h3>
-        <div id="uploadArea" class="st-dropzone">
-          <p class="st-dropzone-titulo">Arrastrá REAP (.txt) o OML (.csv) aquí</p>
-          <p class="st-dropzone-sub">o hacé click para seleccionar</p>
+      <!-- ENCABEZADO -->
+      <section class="st-section">
+        <div class="st-section__header">
+          <p class="st-label st-label--gold">Herramientas GIS · ArcGIS</p>
+          <h1>Geocodificador Híbrido Multi-Formato</h1>
+          <p style="color: var(--st-gris-medio); margin-top: 8px; margin-bottom: 0;">
+            Carga archivos REAP o OML y obtén coordenadas X/Y calculadas automáticamente.
+          </p>
         </div>
-        <input type="file" id="fileInput" accept=".csv, .txt" hidden>
-      </div>
+      </section>
 
-      <div class="st-card">
-        <h3 class="st-card-titulo">2. Ejecución</h3>
-        <div class="st-campo">
-          <label class="st-label-campo">Método de Procesamiento</label>
-          <select id="geoMode" class="st-select">
-            <option value="local">Motor Local (Salta, Jujuy, Tucumán)</option>
-            <option value="api">Modo API (Requiere Netlify activo)</option>
-          </select>
+      <!-- SECCIÓN 1: CARGA DE ARCHIVO -->
+      <section class="st-section">
+        <div class="st-section__header"><h2>1. Cargar archivo</h2></div>
+        
+        <div class="st-upload" id="uploadArea">
+          <div class="st-upload__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+              <polyline points="16 16 12 12 8 16"></polyline>
+              <line x1="12" y1="12" x2="12" y2="21"></line>
+              <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+            </svg>
+          </div>
+          <div class="st-upload__title">Arrastrá tu archivo aquí</div>
+          <div class="st-upload__sub">o hacé click para seleccionar · REAP (.txt) u OML (.csv)</div>
+          <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+            <span class="st-badge st-badge--gray">REAP</span>
+            <span class="st-badge st-badge--gray">OML</span>
+            <span class="st-badge st-badge--gray">TAB</span>
+          </div>
+          <input type="file" id="fileInput" accept=".txt,.csv" style="display: none;" />
         </div>
-        <button id="processBtn" class="st-btn st-btn-primario st-btn-lg" disabled style="width: 100%; justify-content: center;">
-          Procesar y Descargar CSV
-        </button>
-      </div>
+      </section>
+
+      <!-- SECCIÓN 2: PREVIEW INICIAL -->
+      <section class="st-section hidden" id="previewInitialSection">
+        <div class="st-section__header">
+          <h2>2. Vista previa de datos originales</h2>
+          <div id="formatDetected" class="st-alert st-alert--info" style="margin-top: 12px;"></div>
+        </div>
+
+        <div class="st-card">
+          <div class="st-card__body">
+            <div style="margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
+              <div style="background: var(--st-gris-fondo); padding: 12px; border-radius: var(--st-radius-md);">
+                <div class="st-label">Total registros</div>
+                <div style="font-size: 28px; font-weight: 700; color: var(--st-amarillo);" id="totalRowCount">0</div>
+              </div>
+            </div>
+
+            <div class="st-table-wrapper">
+              <table class="st-table">
+                <thead>
+                  <tr>
+                    <th>NRO_SERVICIO</th>
+                    <th>LOCALIDAD</th>
+                    <th>LAT Original</th>
+                    <th>LON Original</th>
+                  </tr>
+                </thead>
+                <tbody id="previewInitialTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 3: SELECCIONAR MODO -->
+      <section class="st-section hidden" id="configSection">
+        <div class="st-section__header"><h2>3. Seleccionar modo de geocodificación</h2></div>
+
+        <div class="st-grid-3">
+          <div class="st-card" style="cursor: pointer; border: 2px solid var(--st-gris-claro);" onclick="selectMode('local')" id="modeLocal">
+            <div class="st-card__body">
+              <div style="font-size: 32px; margin-bottom: 12px;">⚡</div>
+              <div class="st-card__title">Rápido</div>
+              <p style="font-size: var(--st-text-sm); color: var(--st-gris-medio); margin-top: 8px;">BD Local por localidad · Instantáneo</p>
+            </div>
+          </div>
+
+          <div class="st-card" style="cursor: pointer; border: 2px solid var(--st-gris-claro);" onclick="selectMode('api')" id="modeAPI">
+            <div class="st-card__body">
+              <div style="font-size: 32px; margin-bottom: 12px;">🎯</div>
+              <div class="st-card__title">Preciso</div>
+              <p style="font-size: var(--st-text-sm); color: var(--st-gris-medio); margin-top: 8px;">API Nominatim · Dirección exacta</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="modeInfo" class="st-alert st-alert--info" style="margin-top: 20px; display: none;"></div>
+
+        <div class="st-card" style="margin-top: 20px;">
+          <div class="st-card__body">
+            <div class="st-card__footer" style="border: none; padding: 0;">
+              <button class="st-btn st-btn--ghost" onclick="reiniciar()">Cancelar</button>
+              <button class="st-btn st-btn--primary" id="processBtn" onclick="procesarDatos()" disabled>Procesar datos</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 4: RESULTADOS -->
+      <section class="st-section hidden" id="previewSection">
+        <div class="st-section__header">
+          <h2>4. Resultados procesados</h2>
+        </div>
+
+        <div id="geocodingContainer" class="st-alert st-alert--info" style="display: none; margin-bottom: 20px;">
+          ⏳ Geocodificando registros...
+          <div class="st-progress" style="margin-top: 12px;">
+            <div class="st-progress__bar" id="geoProgressFill" style="width: 0%;"></div>
+          </div>
+          <div style="font-size: var(--st-text-sm); margin-top: 8px;" id="geoStatus">Procesando: 0/0</div>
+        </div>
+
+        <div class="st-card">
+          <div class="st-card__body">
+            <div style="margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
+              <div style="background: var(--st-gris-fondo); padding: 12px; border-radius: var(--st-radius-md);">
+                <div class="st-label">Procesados</div>
+                <div style="font-size: 28px; font-weight: 700; color: var(--st-gris-oscuro);" id="processedCount">0</div>
+              </div>
+              <div style="background: var(--st-gris-fondo); padding: 12px; border-radius: var(--st-radius-md);">
+                <div class="st-label">Con coords</div>
+                <div style="font-size: 28px; font-weight: 700; color: var(--st-exito);" id="withCoords">0</div>
+              </div>
+              <div style="background: var(--st-gris-fondo); padding: 12px; border-radius: var(--st-radius-md);">
+                <div class="st-label">Sin coords</div>
+                <div style="font-size: 28px; font-weight: 700; color: var(--st-error);" id="withoutCoords">0</div>
+              </div>
+            </div>
+
+            <div class="st-progress" style="margin-bottom: 20px;">
+              <div class="st-progress__bar" id="progressFill" style="width: 0%;"></div>
+            </div>
+
+            <div class="st-table-wrapper">
+              <table class="st-table">
+                <thead>
+                  <tr>
+                    <th>NRO_SERVICIO</th>
+                    <th>LOCALIDAD</th>
+                    <th>LAT Orig</th>
+                    <th>LON Orig</th>
+                    <th>X Calc</th>
+                    <th>Y Calc</th>
+                    <th>Modo</th>
+                  </tr>
+                </thead>
+                <tbody id="previewTable"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="st-card__footer">
+            <button class="st-btn st-btn--ghost" onclick="reiniciar()">Cargar otro</button>
+            <button class="st-btn st-btn--primary" onclick="descargarCSV()">⬇️ Descargar CSV</button>
+          </div>
+        </div>
+      </section>
+
     </div>
-
-    <section class="st-seccion">
-      <div class="st-card">
-        <h3 class="st-card-titulo">Vista Previa de Resultados</h3>
-        <div class="st-tabla-wrapper">
-          <table id="previewTable" class="st-tabla">
-            <thead>
-              <tr>
-                <th>Referencia</th>
-                <th>Localidad</th>
-                <th>Dirección</th>
-                <th class="st-col-amarillo">Latitud</th>
-                <th class="st-col-amarillo">Longitud</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
   </main>
 
+  <!-- FOOTER -->
   <footer class="st-footer">
-    <div class="st-footer-logo">SER<span class="st-amp">&</span>TEC</div>
-    <div>© 2026 · Servicios y Tecnología · Tucumán, Argentina</div>
+    <div class="st-footer__brand">
+      SER<span class="st-ampersand">&</span>TEC <span style="font-weight:300; font-size: 13px; letter-spacing: 2px;">SAS</span>
+    </div>
+    <div class="st-footer__copy">© 2025 · Servicios y Tecnología · Geocodificador Híbrido · Tucumán, Argentina</div>
   </footer>
 
   <script>
-    // --- LÓGICA DE NEGOCIO INTEGRADA ---
-    const DB_COORDENADAS = {
-      "SALTA": { lat: -24.7821, lon: -65.4232 },
-      "JUJUY": { lat: -24.1858, lon: -65.2995 },
-      "TUCUMAN": { lat: -26.8083, lon: -65.2176 },
-      "TAFI VIEJO": { lat: -26.7328, lon: -65.2591 },
-      "YERBA BUENA": { lat: -26.8167, lon: -65.3167 }
+    let datosGlobales = [];
+    let datosProcessados = [];
+    let modoSeleccionado = null;
+    let formatoDetectado = null;
+    let columnasOriginales = [];
+    
+    const coordenadaLocalidades = {
+      'SALTA': {lat: '-24,789322', lon: '-65,410351'},
+      'PICHANAL': {lat: '-24,068', lon: '-65,133'},
+      'SAN SALVADOR DE JUJUY': {lat: '-24,182787', lon: '-65,314820'},
+      'AGUARAY': {lat: '-24,073056', lon: '-63,806389'},
+      'HIPOLITO IRIGOYEN': {lat: '-24,195833', lon: '-63,881667'},
+      'METAN': {lat: '-25,488515', lon: '-64,967940'},
+      'TARTAGAL': {lat: '-22,516787', lon: '-63,808606'},
+      'PALPALA': {lat: '-24,355278', lon: '-65,404722'},
+      'LIBERTADOR GENERAL SAN MARTIN': {lat: '-23,815217', lon: '-64,792801'},
+      'SAN PEDRO': {lat: '-24,231558', lon: '-64,867835'},
+      'CERRILLOS': {lat: '-25,294167', lon: '-65,491667'},
+      'ORAN': {lat: '-23,136108', lon: '-64,322985'},
+      'CAMPO SANTO': {lat: '-25,345', lon: '-65,258'},
+      'FRAILE PINTADO': {lat: '-23,928889', lon: '-65,400556'},
+      'GENERAL GUEMES': {lat: '-25,198333', lon: '-65,339444'},
+      'LAS LAJITAS': {lat: '-25,201389', lon: '-63,930556'},
+      'EL BORDO': {lat: '-25,411667', lon: '-65,104167'},
+      'EL QUEBRACHAL': {lat: '-25,178', lon: '-64,368'},
+      'MOSCONI': {lat: '-22,393889', lon: '-63,618056'},
+      'SALVADOR MAZZA': {lat: '-22,100833', lon: '-63,711389'},
+      'PERICO': {lat: '-24,016389', lon: '-65,511389'},
+      'SANTO DOMINGO': {lat: '-24,163056', lon: '-65,358889'},
+      'LA MENDIETA': {lat: '-23,716667', lon: '-65,466667'},
+      'MONTERRICO': {lat: '-23,6', lon: '-65,65'},
+      'APOLINARIO SARAVIA': {lat: '-22,871944', lon: '-63,951667'},
+      'J. V. GONZALEZ': {lat: '-23,015833', lon: '-63,746667'},
+      'GRAL. PIZARRO': {lat: '-22,538333', lon: '-63,863056'},
+      'EL CARMEN': {lat: '-23,616111', lon: '-65,566667'},
+      'EMBARCACION': {lat: '-23,219167', lon: '-64,176111'},
+      'HUMAHUACA': {lat: '-23,203529', lon: '-65,349593'},
+      'TILCARA': {lat: '-23,574444', lon: '-65,405'},
+      'YALA': {lat: '-24,137222', lon: '-65,329722'},
+      'LOZANO': {lat: '-23,815278', lon: '-65,325833'},
+      'MAIMARA': {lat: '-23,639722', lon: '-65,406389'},
+      'ROSARIO DE LA FRONTERA': {lat: '-25,837222', lon: '-64,953889'},
+      'ROSARIO DE LERMA': {lat: '-26,182222', lon: '-64,850833'},
+      'SAN LUIS': {lat: '-25,205556', lon: '-65,497778'},
+      'LA QUIACA': {lat: '-23,736389', lon: '-65,596667'}
     };
 
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
-    const processBtn = document.getElementById('processBtn');
-    const tbody = document.querySelector('#previewTable tbody');
-    let datosCargados = [];
 
-    // Drag & Drop
-    uploadArea.onclick = () => fileInput.click();
-    fileInput.onchange = (e) => leer(e.target.files[0]);
-    uploadArea.ondragover = (e) => { e.preventDefault(); uploadArea.classList.add('activo'); };
-    uploadArea.ondrop = (e) => { e.preventDefault(); leer(e.dataTransfer.files[0]); };
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.borderColor = 'var(--st-amarillo)'; });
+    uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = ''; });
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '';
+      if (e.dataTransfer.files.length) procesarArchivo(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) procesarArchivo(e.target.files[0]);
+    });
 
-    function leer(file) {
-      if (!file) return;
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
-          datosCargados = results.data;
-          render(datosCargados.slice(0, 10)); // Vista previa inmediata
-          processBtn.disabled = false;
-        }
-      });
-    }
-
-    function render(filas, procesado = false) {
-      tbody.innerHTML = filas.map(f => `
-        <tr>
-          <td>${f.Referencia || f.OML || f.ID || '-'}</td>
-          <td>${f.Localidad || '-'}</td>
-          <td>${f.Direccion || f.Calle || '-'}</td>
-          <td>${f.Latitud || '-'}</td>
-          <td>${f.Longitud || '-'}</td>
-          <td><span class="st-badge ${procesado ? 'st-badge-exito' : 'st-badge-gris'}">
-            ${procesado ? 'Listo' : 'Pendiente'}</span>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    processBtn.onclick = async () => {
-      const modo = document.getElementById('geoMode').value;
-      processBtn.innerText = "Trabajando...";
-      
-      let resultados = [];
-
-      if (modo === 'api') {
+    function procesarArchivo(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
         try {
-          const res = await fetch('/.netlify/functions/geocodificar', {
-            method: 'POST',
-            body: JSON.stringify(datosCargados)
-          });
-          if(!res.ok) throw new Error();
-          resultados = await res.json();
-        } catch (e) {
-          alert("Error de créditos en Netlify. Usando Motor Local automáticamente.");
-          resultados = procesarOffline(datosCargados);
+          const contenido = e.target.result;
+          let lineas = contenido.trim().split('\n');
+          
+          if (lineas.length < 2) { alert('El archivo debe tener encabezados y al menos un registro'); return; }
+          
+          lineas = lineas.filter(l => l.trim().length > 0);
+          const encabezados = lineas[0].split('\t');
+          columnasOriginales = encabezados.map(h => h.trim());
+          
+          detectarFormato(columnasOriginales);
+          
+          datosGlobales = [];
+          for (let i = 1; i < lineas.length; i++) {
+            const valores = lineas[i].split('\t');
+            if (valores.length >= encabezados.length) {
+              const fila = {};
+              encabezados.forEach((header, idx) => {
+                fila[header.trim()] = valores[idx] ? valores[idx].trim() : '';
+              });
+              datosGlobales.push(fila);
+            }
+          }
+          
+          mostrarPreviewInicial();
+        } catch (error) {
+          alert('Error: ' + error.message);
         }
-      } else {
-        resultados = procesarOffline(datosCargados);
-      }
-
-      render(resultados.slice(0, 50), true);
-      descargar(resultados);
-      processBtn.innerText = "Procesar y Descargar CSV";
-    };
-
-    function procesarOffline(data) {
-      return data.map(f => {
-        const loc = (f.Localidad || "").toUpperCase();
-        const coords = DB_COORDENADAS[loc] || { lat: -26.8, lon: -65.2 }; // Tucumán por defecto
-        return { ...f, Latitud: coords.lat, Longitud: coords.lon };
-      });
+      };
+      reader.readAsText(file);
     }
 
-    function descargar(data) {
-      const csv = Papa.unparse(data);
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = "SERTEC_GIS_DATA.csv";
-      a.click();
+    function detectarFormato(encabezados) {
+      if (encabezados.includes('NRO_LIST_REAPER')) {
+        formatoDetectado = 'REAP';
+      } else if (encabezados.includes('NRO_ASIG_OML_CONT')) {
+        formatoDetectado = 'OML';
+      } else {
+        formatoDetectado = 'DESCONOCIDO';
+      }
+    }
+
+    function mostrarPreviewInicial() {
+      document.getElementById('previewInitialSection').classList.remove('hidden');
+      document.getElementById('configSection').classList.remove('hidden');
+      document.getElementById('previewSection').classList.add('hidden');
+      
+      const badge = document.getElementById('formatDetected');
+      badge.textContent = `📋 Formato: ${formatoDetectado} | ${datosGlobales.length} registros`;
+      
+      document.getElementById('totalRowCount').textContent = datosGlobales.length;
+      
+      const tabla = document.getElementById('previewInitialTable');
+      tabla.innerHTML = '';
+      
+      datosGlobales.forEach(fila => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${fila['NRO_SERVICIO'] || '-'}</td>
+          <td>${fila['LOCALIDAD_SERVICIO'] || '-'}</td>
+          <td>${fila['LATITUD'] || '(vacío)'}</td>
+          <td>${fila['LONGITUD'] || '(vacío)'}</td>
+        `;
+        tabla.appendChild(tr);
+      });
+
+      document.getElementById('modeLocal').classList.add('st-card--accent');
+      modoSeleccionado = 'local';
+      actualizarModoInfo();
+    }
+
+    function selectMode(modo) {
+      modoSeleccionado = modo;
+      document.getElementById('modeLocal').classList.toggle('st-card--accent', modo === 'local');
+      document.getElementById('modeAPI').classList.toggle('st-card--accent', modo === 'api');
+      actualizarModoInfo();
+      document.getElementById('processBtn').disabled = false;
+    }
+
+    function actualizarModoInfo() {
+      const modeInfo = document.getElementById('modeInfo');
+      modeInfo.classList.remove('hidden');
+      
+      if (modoSeleccionado === 'local') {
+        modeInfo.textContent = '⚡ Modo Rápido: Geocodificación instantánea utilizando base de datos local de localidades.';
+      } else {
+        if (datosGlobales.length > 50) {
+          modeInfo.textContent = `⚠️ Modo Preciso: ${datosGlobales.length} registros. API lenta (~1 seg/registro). Se recomienda máximo 50 registros.`;
+        } else {
+          modeInfo.textContent = `🎯 Modo Preciso: Dirección exacta mediante API Nominatim. ${datosGlobales.length} registros (~${datosGlobales.length} segundos).`;
+        }
+      }
+    }
+
+    async function procesarDatos() {
+      document.getElementById('previewInitialSection').classList.add('hidden');
+      document.getElementById('configSection').classList.add('hidden');
+      document.getElementById('previewSection').classList.remove('hidden');
+      
+      if (modoSeleccionado === 'local') {
+        procesarLocal();
+      } else {
+        await procesarAPI();
+      }
+    }
+
+    function procesarLocal() {
+      datosProcessados = datosGlobales.map(fila => {
+        const latOrig = fila['LATITUD'] || '';
+        const lonOrig = fila['LONGITUD'] || '';
+        const localidad = (fila['LOCALIDAD_SERVICIO'] || '').toUpperCase();
+        
+        let x, y, modo;
+        
+        if (latOrig && lonOrig && latOrig !== '0' && latOrig.toLowerCase() !== 'nan') {
+          x = formatearCoordenada(lonOrig);
+          y = formatearCoordenada(latOrig);
+          modo = 'Original';
+        } else {
+          const coords = coordenadaLocalidades[localidad];
+          if (coords) {
+            x = coords.lon;
+            y = coords.lat;
+            modo = 'Localidad';
+          } else {
+            x = '0';
+            y = '0';
+            modo = 'No encontrado';
+          }
+        }
+        
+        return { ...fila, 'x': x, 'y': y, modo: modo };
+      });
+      
+      mostrarPreview();
+    }
+
+    async function procesarAPI() {
+      document.getElementById('geocodingContainer').style.display = 'block';
+      datosProcessados = [];
+      
+      for (let i = 0; i < datosGlobales.length; i++) {
+        const fila = datosGlobales[i];
+        const latOrig = fila['LATITUD'] || '';
+        const lonOrig = fila['LONGITUD'] || '';
+        const localidad = (fila['LOCALIDAD_SERVICIO'] || '').toUpperCase();
+        
+        let x, y, modo;
+        
+        if (latOrig && lonOrig && latOrig !== '0' && latOrig.toLowerCase() !== 'nan') {
+          x = formatearCoordenada(lonOrig);
+          y = formatearCoordenada(latOrig);
+          modo = 'Original';
+        } else {
+          const calle = fila['CALLE_SERVICIO'] || '';
+          const numero = fila['NRO_CALLE_SERVICIO'] || '';
+          const provincia = fila['PROVINCIA_SERVICIO'] || '';
+          
+          try {
+            const response = await fetch('/.netlify/functions/geocodificar', {
+              method: 'POST',
+              body: JSON.stringify({ calle, numero, localidad, provincia })
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+              x = data.lon.replace('.', ',');
+              y = data.lat.replace('.', ',');
+              modo = 'API';
+            } else {
+              const coords = coordenadaLocalidades[localidad];
+              x = coords ? coords.lon : '0';
+              y = coords ? coords.lat : '0';
+              modo = coords ? 'Fallback' : 'No encontrado';
+            }
+          } catch (error) {
+            const coords = coordenadaLocalidades[localidad];
+            x = coords ? coords.lon : '0';
+            y = coords ? coords.lat : '0';
+            modo = coords ? 'Fallback' : 'Error';
+          }
+        }
+        
+        datosProcessados.push({ ...fila, 'x': x, 'y': y, modo: modo });
+        
+        const porcentaje = Math.round((i + 1) / datosGlobales.length * 100);
+        document.getElementById('geoProgressFill').style.width = porcentaje + '%';
+        document.getElementById('geoStatus').textContent = `Procesando: ${i + 1}/${datosGlobales.length}`;
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      document.getElementById('geocodingContainer').style.display = 'none';
+      mostrarPreview();
+    }
+
+    function formatearCoordenada(valor) {
+      let formatted = String(valor).trim();
+      if (formatted.includes(',') && formatted.match(/^-?\d+,\d+/)) {
+        return formatted;
+      }
+      if (formatted.includes('.')) {
+        return formatted.replace('.', ',');
+      }
+      return formatted;
+    }
+
+    function mostrarPreview() {
+      const tabla = document.getElementById('previewTable');
+      tabla.innerHTML = '';
+      
+      let conCoordenadas = 0;
+      let sinCoordenadas = 0;
+      
+      datosProcessados.forEach(fila => {
+        if (fila['x'] === '0' || !fila['x']) sinCoordenadas++;
+        else conCoordenadas++;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${fila['NRO_SERVICIO'] || '-'}</td>
+          <td>${fila['LOCALIDAD_SERVICIO'] || '-'}</td>
+          <td>${fila['LATITUD'] || '(vacío)'}</td>
+          <td>${fila['LONGITUD'] || '(vacío)'}</td>
+          <td><strong>${fila['x']}</strong></td>
+          <td><strong>${fila['y']}</strong></td>
+          <td>${fila['modo']}</td>
+        `;
+        tabla.appendChild(tr);
+      });
+      
+      document.getElementById('processedCount').textContent = datosProcessados.length;
+      document.getElementById('withCoords').textContent = conCoordenadas;
+      document.getElementById('withoutCoords').textContent = sinCoordenadas;
+      document.getElementById('progressFill').style.width = '100%';
+    }
+
+    function descargarCSV() {
+      let csv = generarCSV();
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${formatoDetectado}_GEOCODIFICADO_${new Date().getTime()}.csv`;
+      link.click();
+    }
+
+    function generarCSV() {
+      if (!datosProcessados.length) return '';
+      const todasLasColumnas = [...columnasOriginales, 'x', 'y'];
+      let csv = todasLasColumnas.join(';') + '\n';
+      
+      datosProcessados.forEach(fila => {
+        const valores = todasLasColumnas.map(header => {
+          let valor = fila[header] || '';
+          if (valor.includes(';') || valor.includes('"')) {
+            valor = '"' + valor.replace(/"/g, '""') + '"';
+          }
+          return valor;
+        });
+        csv += valores.join(';') + '\n';
+      });
+      return csv;
+    }
+
+    function reiniciar() {
+      datosGlobales = [];
+      datosProcessados = [];
+      modoSeleccionado = null;
+      formatoDetectado = null;
+      columnasOriginales = [];
+      fileInput.value = '';
+      document.getElementById('previewInitialSection').classList.add('hidden');
+      document.getElementById('configSection').classList.add('hidden');
+      document.getElementById('previewSection').classList.add('hidden');
     }
   </script>
+
 </body>
 </html>
