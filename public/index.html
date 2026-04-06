@@ -3,66 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SER&TEC — Geocodificador REAP/OML</title>
-  
+  <title>SER&TEC — Geocodificador</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
-  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-  
   <link rel="stylesheet" href="sertec-brand.css">
 </head>
 <body class="st-pagina">
 
   <nav class="st-navbar">
     <div class="st-navbar-logo">
-      <img src="LogoST.png" alt="Ser&Tec SAS" onerror="this.style.display='none'">
+      <img src="LogoST.png" alt="Ser&Tec" onerror="this.style.display='none'">
       <span class="st-navbar-nombre">SER<span class="st-amp">&</span>TEC<span class="st-sas">SAS</span></span>
     </div>
     <div class="st-navbar-herramienta">Geocodificador ArcGIS</div>
   </nav>
 
   <main class="st-contenedor">
-    
     <section class="st-seccion">
       <p class="st-label-amarillo">Sistemas GIS · Salta & Jujuy</p>
-      <h1>Procesamiento Multi-Formato</h1>
-      <p class="st-texto-secundario">Herramienta para normalizar coordenadas REAP, OML y ArcGIS.</p>
+      <h1>Procesamiento de Registros</h1>
     </section>
 
     <div class="st-grid-2">
       <div class="st-card st-card-accent">
-        <h3 class="st-card-titulo">1. Cargar Archivo de Datos</h3>
+        <h3 class="st-card-titulo">1. Cargar Archivo</h3>
         <div id="uploadArea" class="st-dropzone">
-          <div class="st-dropzone-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#E6A817" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
-            </svg>
-          </div>
-          <p class="st-dropzone-titulo">Arrastrá tu archivo REAP (.txt) u OML (.csv)</p>
-          <p class="st-dropzone-sub">O hacé click para buscar en tu equipo</p>
+          <p class="st-dropzone-titulo">Arrastrá el archivo REAP o OML aquí</p>
+          <p class="st-dropzone-sub">o hacé click para buscar</p>
         </div>
-        <input type="file" id="fileInput" accept=".csv, .txt, .xlsx" hidden>
+        <input type="file" id="fileInput" accept=".csv, .txt" hidden>
       </div>
 
       <div class="st-card">
-        <h3 class="st-card-titulo">2. Configuración</h3>
+        <h3 class="st-card-titulo">2. Ejecución</h3>
         <div class="st-campo">
-          <label class="st-label-campo">Modo de Geocodificación</label>
+          <label class="st-label-campo">Método</label>
           <select id="geoMode" class="st-select">
-            <option value="local">Modo Local (Diccionario NOA)</option>
-            <option value="api">Modo Preciso (Netlify Function)</option>
+            <option value="local">Modo Local (Rápido)</option>
+            <option value="api">Modo Preciso (API)</option>
           </select>
         </div>
         <button id="processBtn" class="st-btn st-btn-primario st-btn-lg" disabled style="width: 100%; justify-content: center;">
-          Procesar datos
+          Procesar Datos
         </button>
-        <p id="fileStatus" class="st-hint" style="margin-top: 10px; text-align: center;"></p>
       </div>
     </div>
 
     <section class="st-seccion">
       <div class="st-card">
-        <h3 class="st-card-titulo">Vista Previa y Resultados</h3>
+        <h3 class="st-card-titulo">Resultados</h3>
         <div class="st-tabla-wrapper">
           <table id="previewTable" class="st-tabla">
             <thead>
@@ -75,108 +64,83 @@
                 <th>Estado</th>
               </tr>
             </thead>
-            <tbody>
-              </tbody>
+            <tbody></tbody>
           </table>
         </div>
       </div>
     </section>
-
   </main>
-
-  <footer class="st-footer">
-    <div class="st-footer-logo">SER<span class="st-amp">&</span>TEC</div>
-    <div>© 2026 · Servicios y Tecnología · Tucumán, Argentina</div>
-  </footer>
 
   <script>
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
     const processBtn = document.getElementById('processBtn');
-    const fileStatus = document.getElementById('fileStatus');
-    const previewTable = document.getElementById('previewTable').getElementsByTagName('tbody')[0];
+    const tbody = document.querySelector('#previewTable tbody');
+    let rawData = [];
 
-    let datosCargados = [];
-
-    // --- LÓGICA DE INTERFAZ ---
-
+    // Manejo de archivos
     uploadArea.onclick = () => fileInput.click();
-
-    uploadArea.ondragover = (e) => {
-      e.preventDefault();
-      uploadArea.classList.add('activo');
-    };
-
+    fileInput.onchange = (e) => leerArchivo(e.target.files[0]);
+    
+    uploadArea.ondragover = (e) => { e.preventDefault(); uploadArea.classList.add('activo'); };
     uploadArea.ondragleave = () => uploadArea.classList.remove('activo');
-
     uploadArea.ondrop = (e) => {
       e.preventDefault();
       uploadArea.classList.remove('activo');
-      const file = e.dataTransfer.files[0];
-      if (file) procesarLectura(file);
+      leerArchivo(e.dataTransfer.files[0]);
     };
 
-    fileInput.onchange = (e) => {
-      const file = e.target.files[0];
-      if (file) procesarLectura(file);
-    };
-
-    // --- LÓGICA DE PROCESAMIENTO ---
-
-    function procesarLectura(file) {
-      fileStatus.innerText = `Archivo cargado: ${file.name}`;
-      
+    function leerArchivo(file) {
+      if (!file) return;
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
         complete: function(results) {
-          datosCargados = results.data;
-          mostrarVistaPrevia(datosCargados.slice(0, 5)); // Mostrar primeros 5
+          rawData = results.data;
+          renderTabla(rawData.slice(0, 10)); // Vista previa
           processBtn.disabled = false;
+          processBtn.innerText = `Procesar ${file.name}`;
         }
       });
     }
 
-    function mostrarVistaPrevia(filas) {
-      previewTable.innerHTML = "";
-      filas.forEach(fila => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${fila.Referencia || fila.ID || '-'}</td>
-          <td>${fila.Localidad || '-'}</td>
-          <td>${fila.Direccion || '-'}</td>
+    function renderTabla(datos) {
+      tbody.innerHTML = datos.map(f => `
+        <tr>
+          <td>${f.Referencia || f.ID || '-'}</td>
+          <td>${f.Localidad || '-'}</td>
+          <td>${f.Direccion || f.Calle || '-'}</td>
           <td>-</td>
           <td>-</td>
-          <td><span class="st-badge st-badge-gris">Pendiente</span></td>
-        `;
-        previewTable.appendChild(tr);
-      });
+          <td><span class="st-badge st-badge-gris">Listo</span></td>
+        </tr>
+      `).join('');
     }
 
     processBtn.onclick = async () => {
-      const modo = document.getElementById('geoMode').value;
-      processBtn.innerText = "Procesando...";
       processBtn.disabled = true;
-
+      processBtn.innerText = "Procesando...";
+      
+      const modo = document.getElementById('geoMode').value;
+      
       if (modo === 'api') {
-        // Conexión con tu Netlify Function
         try {
-          const response = await fetch('/.netlify/functions/geocodificar', {
+          const res = await fetch('/.netlify/functions/geocodificar', {
             method: 'POST',
-            body: JSON.stringify(datosCargados)
+            body: JSON.stringify(rawData)
           });
-          const resultado = await response.json();
-          console.log("Resultado API:", resultado);
-          // Aquí actualizarías la tabla con los datos de la API
-        } catch (err) {
-          alert("Error al conectar con la función de geocodificación");
+          const final = await res.json();
+          // Aquí actualizas con los datos reales de la API
+          alert("Proceso finalizado vía API");
+        } catch (e) {
+          alert("Error en la conexión con Netlify Functions");
         }
       } else {
-        alert("Modo local ejecutado. Revisar consola para resultados.");
+        alert("Proceso Local completado (Simulación)");
       }
       
-      processBtn.innerText = "Procesar datos";
       processBtn.disabled = false;
+      processBtn.innerText = "Procesar Datos";
     };
   </script>
 </body>
