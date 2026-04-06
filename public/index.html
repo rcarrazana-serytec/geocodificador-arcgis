@@ -404,12 +404,14 @@
                 let x, y, modo;
                 
                 if (latOrig && lonOrig && latOrig !== '0' && latOrig.toLowerCase() !== 'nan') {
-                    x = formatearCoordenada(latOrig);
-                    y = formatearCoordenada(lonOrig);
+                    // x = LONGITUD, y = LATITUD
+                    x = formatearCoordenada(lonOrig);
+                    y = formatearCoordenada(latOrig);
                     modo = 'Original';
                 } else {
                     const coords = coordenadaLocalidades[localidad];
                     if (coords) {
+                        // BD local: coords.lon = LONGITUD, coords.lat = LATITUD
                         x = coords.lon;
                         y = coords.lat;
                         modo = 'Localidad';
@@ -420,7 +422,7 @@
                     }
                 }
                 
-                return { ...fila, 'x': y, 'y': x, modo: modo };
+                return { ...fila, 'x': x, 'y': y, modo: modo };
             });
             
             mostrarPreview();
@@ -439,8 +441,9 @@
                 let x, y, modo;
                 
                 if (latOrig && lonOrig && latOrig !== '0' && latOrig.toLowerCase() !== 'nan') {
-                    x = formatearCoordenada(latOrig);
-                    y = formatearCoordenada(lonOrig);
+                    // x = LONGITUD, y = LATITUD
+                    x = formatearCoordenada(lonOrig);
+                    y = formatearCoordenada(latOrig);
                     modo = 'Original';
                 } else {
                     const calle = fila['CALLE_SERVICIO'] || '';
@@ -455,6 +458,8 @@
                         const data = await response.json();
                         
                         if (data.success) {
+                            // API devuelve: lat, lon
+                            // x = LONGITUD, y = LATITUD
                             x = data.lon.replace('.', ',');
                             y = data.lat.replace('.', ',');
                             modo = 'API';
@@ -472,7 +477,7 @@
                     }
                 }
                 
-                datosProcessados.push({ ...fila, 'x': y, 'y': x, modo: modo });
+                datosProcessados.push({ ...fila, 'x': x, 'y': y, modo: modo });
                 
                 const porcentaje = Math.round((i + 1) / datosGlobales.length * 100);
                 document.getElementById('geoProgressFill').style.width = porcentaje + '%';
