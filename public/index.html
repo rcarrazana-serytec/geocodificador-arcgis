@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geocodificador Híbrido - Salta & Jujuy</title>
+    <title>Geocodificador Híbrido - Multi-Formato</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9fa; }
@@ -13,6 +13,8 @@
         .header { margin-bottom: 2rem; }
         .header h1 { font-size: 28px; font-weight: 600; color: #1a1a1a; margin-bottom: 0.5rem; }
         .header p { font-size: 14px; color: #666; }
+        
+        .format-badge { display: inline-block; padding: 0.5rem 1rem; background: #dbeafe; color: #1e40af; border-radius: 20px; font-size: 12px; font-weight: 600; margin-left: 1rem; }
         
         .section { margin-bottom: 2rem; }
         .section-title { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 1rem; }
@@ -68,9 +70,8 @@
         td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; color: #666; }
         tr:hover { background: #f9fafb; }
         
-        .warning { background: #fef3c7; color: #92400e; padding: 12px; border-radius: 6px; font-size: 13px; margin: 1rem 0; border-left: 4px solid #f59e0b; }
         .info { background: #dbeafe; color: #1e40af; padding: 12px; border-radius: 6px; font-size: 13px; margin: 1rem 0; border-left: 4px solid #2563eb; }
-        .success { background: #d1fae5; color: #065f46; padding: 12px; border-radius: 6px; font-size: 13px; margin: 1rem 0; border-left: 4px solid #10b981; }
+        .warning { background: #fef3c7; color: #92400e; padding: 12px; border-radius: 6px; font-size: 13px; margin: 1rem 0; border-left: 4px solid #f59e0b; }
         
         .action-buttons { display: flex; gap: 12px; margin-top: 1.5rem; flex-wrap: wrap; }
         button { 
@@ -98,12 +99,6 @@
         .progress-fill { height: 100%; background: #10b981; transition: width 0.3s; }
         
         .hidden { display: none; }
-        
-        .profiles { background: #f9fafb; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border: 1px solid #e5e7eb; }
-        .profile-item { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
-        .profile-item:last-child { margin-bottom: 0; }
-        .profile-btn { padding: 6px 12px; font-size: 12px; }
-        
         .geocoding-progress { margin: 1rem 0; }
         .geocoding-status { font-size: 12px; color: #666; margin-top: 0.5rem; }
     </style>
@@ -111,17 +106,18 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🗺️ Geocodificador Híbrido</h1>
-            <p>Salta & Jujuy - Procesamiento inteligente de reaperturas para ArcGIS</p>
+            <h1>🗺️ Geocodificador Híbrido Multi-Formato</h1>
+            <p>Salta & Jujuy - REAP + OML - ArcGIS</p>
         </div>
         
         <div class="section">
             <div class="section-title">1. Cargar archivo</div>
             <div class="upload-area" id="uploadArea">
-                <div class="upload-text">Arrastra tu archivo .txt o haz clic para seleccionar</div>
-                <div class="upload-subtext">Formato: .txt con columnas separadas por TAB</div>
-                <input type="file" id="fileInput" accept=".txt" />
+                <div class="upload-text">Arrastra tu archivo REAP (.txt) u OML (.csv)</div>
+                <div class="upload-subtext">Soporta: REAP (.txt con TAB) | OML (.csv con TAB)</div>
+                <input type="file" id="fileInput" accept=".txt,.csv" />
             </div>
+            <div id="formatDetected" class="info hidden" style="margin-top: 1rem;"></div>
         </div>
         
         <div id="configSection" class="section hidden">
@@ -131,18 +127,12 @@
                 <div class="mode-selector" id="modeSelector">
                     <div class="mode-option" onclick="selectMode('local')">
                         <div class="mode-title">⚡ Rápido (BD Local)</div>
-                        <div class="mode-desc">Instantáneo, por localidad. Ideal para muchos registros.</div>
+                        <div class="mode-desc">Instantáneo, por localidad.</div>
                     </div>
                     <div class="mode-option" onclick="selectMode('api')">
-                        <div class="mode-title">🎯 Preciso (API Nominatim)</div>
-                        <div class="mode-desc">Dirección exacta. Máx 50 registros.</div>
+                        <div class="mode-title">🎯 Preciso (API)</div>
+                        <div class="mode-desc">Dirección exacta. Máx 50 reg.</div>
                     </div>
-                </div>
-                
-                <div id="profilesSection" class="profiles" style="display: none;">
-                    <strong style="font-size: 12px; color: #666;">📌 Perfiles guardados</strong>
-                    <div id="profilesList"></div>
-                    <button class="profile-btn" onclick="crearPerfil()" style="margin-top: 8px;">+ Guardar configuración</button>
                 </div>
                 
                 <div id="modeInfo" class="info"></div>
@@ -188,14 +178,11 @@
                     <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
                 </div>
                 
-                <div id="warningsContainer"></div>
-                
                 <div class="table-wrapper">
                     <table>
                         <thead>
                             <tr>
-                                <th>NRO_LIST</th>
-                                <th>OFICINA</th>
+                                <th>NRO_SERVICIO</th>
                                 <th>LOCALIDAD</th>
                                 <th>LAT Orig</th>
                                 <th>LON Orig</th>
@@ -220,6 +207,8 @@
         let datosGlobales = [];
         let datosProcessados = [];
         let modoSeleccionado = null;
+        let formatoDetectado = null;
+        let columnasOriginales = [];
         
         const coordenadaLocalidades = {
             'SALTA': {lat: '-24.789322', lon: '-65.410351'},
@@ -281,12 +270,21 @@
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
-                    const lineas = e.target.result.trim().split('\n');
+                    const contenido = e.target.result;
+                    let lineas = contenido.trim().split('\n');
+                    
                     if (lineas.length < 2) { alert('El archivo debe tener encabezados y al menos un registro'); return; }
                     
-                    const encabezados = lineas[0].split('\t');
-                    datosGlobales = [];
+                    // Limpiar saltos de línea adicionales
+                    lineas = lineas.filter(l => l.trim().length > 0);
                     
+                    const encabezados = lineas[0].split('\t');
+                    columnasOriginales = encabezados.map(h => h.trim());
+                    
+                    // Detectar formato
+                    detectarFormato(columnasOriginales);
+                    
+                    datosGlobales = [];
                     for (let i = 1; i < lineas.length; i++) {
                         const valores = lineas[i].split('\t');
                         if (valores.length >= encabezados.length) {
@@ -306,13 +304,26 @@
             reader.readAsText(file);
         }
         
+        function detectarFormato(encabezados) {
+            if (encabezados.includes('NRO_LIST_REAPER')) {
+                formatoDetectado = 'REAP';
+            } else if (encabezados.includes('NRO_ASIG_OML_CONT')) {
+                formatoDetectado = 'OML';
+            } else {
+                formatoDetectado = 'DESCONOCIDO';
+            }
+            
+            const badge = document.getElementById('formatDetected');
+            badge.classList.remove('hidden');
+            badge.textContent = `📋 Formato detectado: ${formatoDetectado} (${datosGlobales.length} registros)`;
+        }
+        
         function mostrarConfiguracion() {
             document.getElementById('configSection').classList.remove('hidden');
             document.getElementById('previewSection').classList.add('hidden');
             document.getElementById('modeSelector').querySelector('.mode-option').classList.add('selected');
             modoSeleccionado = 'local';
             actualizarModoInfo();
-            cargarPerfiles();
         }
         
         function selectMode(modo) {
@@ -326,12 +337,12 @@
         function actualizarModoInfo() {
             let info = '';
             if (modoSeleccionado === 'local') {
-                info = '⚡ Se geocodificará por LOCALIDAD_SERVICIO usando base de datos local. Rápido e instantáneo.';
+                info = '⚡ Geocodificación local instantánea por localidad.';
             } else {
                 if (datosGlobales.length > 50) {
-                    info = `⚠️ Advertencia: tienes ${datosGlobales.length} registros. El modo API es lento (máx 50 recomendado). Cada geocodificación tarda ~1 segundo.`;
+                    info = `⚠️ ${datosGlobales.length} registros. API lenta (~1 seg/registro). Máx 50 recomendado.`;
                 } else {
-                    info = `🎯 Modo API: geocodificación precisa por CALLE + NÚMERO + LOCALIDAD + PROVINCIA. ${datosGlobales.length} registros (~${Math.ceil(datosGlobales.length)} segundos).`;
+                    info = `🎯 Modo API: dirección exacta. ${datosGlobales.length} registros (~${datosGlobales.length} segundos).`;
                 }
             }
             document.getElementById('modeInfo').textContent = info;
@@ -357,7 +368,7 @@
                 
                 let x, y, modo;
                 
-                if (latOrig && lonOrig && latOrig !== '0') {
+                if (latOrig && lonOrig && latOrig !== '0' && latOrig.toLowerCase() !== 'nan') {
                     x = formatearCoordenada(latOrig);
                     y = formatearCoordenada(lonOrig);
                     modo = 'Original';
@@ -378,7 +389,6 @@
                     ...fila,
                     'x': y,
                     'y': x,
-                    'dispositivo': '',
                     modo: modo
                 };
             });
@@ -398,7 +408,7 @@
                 
                 let x, y, modo;
                 
-                if (latOrig && lonOrig && latOrig !== '0') {
+                if (latOrig && lonOrig && latOrig !== '0' && latOrig.toLowerCase() !== 'nan') {
                     x = formatearCoordenada(latOrig);
                     y = formatearCoordenada(lonOrig);
                     modo = 'Original';
@@ -410,43 +420,25 @@
                     try {
                         const response = await fetch('/.netlify/functions/geocodificar', {
                             method: 'POST',
-                            body: JSON.stringify({
-                                calle,
-                                numero,
-                                localidad,
-                                provincia
-                            })
+                            body: JSON.stringify({ calle, numero, localidad, provincia })
                         });
-                        
                         const data = await response.json();
                         
                         if (data.success) {
                             x = data.lat;
                             y = data.lon;
-                            modo = 'API Nominatim';
+                            modo = 'API';
                         } else {
                             const coords = coordenadaLocalidades[localidad];
-                            if (coords) {
-                                x = coords.lat;
-                                y = coords.lon;
-                                modo = 'Fallback Localidad';
-                            } else {
-                                x = '0';
-                                y = '0';
-                                modo = 'No encontrado';
-                            }
+                            x = coords ? coords.lat : '0';
+                            y = coords ? coords.lon : '0';
+                            modo = coords ? 'Fallback' : 'No encontrado';
                         }
                     } catch (error) {
                         const coords = coordenadaLocalidades[localidad];
-                        if (coords) {
-                            x = coords.lat;
-                            y = coords.lon;
-                            modo = 'Fallback Localidad';
-                        } else {
-                            x = '0';
-                            y = '0';
-                            modo = 'Error API';
-                        }
+                        x = coords ? coords.lat : '0';
+                        y = coords ? coords.lon : '0';
+                        modo = coords ? 'Fallback' : 'Error';
                     }
                 }
                 
@@ -454,7 +446,6 @@
                     ...fila,
                     'x': y,
                     'y': x,
-                    'dispositivo': '',
                     modo: modo
                 });
                 
@@ -490,8 +481,7 @@
                 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${fila['NRO_LIST_REAPER'] || '-'}</td>
-                    <td>${fila['OFICINA_COMERCIAL'] || '-'}</td>
+                    <td>${fila['NRO_SERVICIO'] || '-'}</td>
                     <td>${fila['LOCALIDAD_SERVICIO'] || '-'}</td>
                     <td>${fila['LATITUD'] || '(vacío)'}</td>
                     <td>${fila['LONGITUD'] || '(vacío)'}</td>
@@ -506,15 +496,6 @@
             document.getElementById('withCoords').textContent = conCoordenadas;
             document.getElementById('withoutCoords').textContent = sinCoordenadas;
             document.getElementById('progressFill').style.width = '100%';
-            
-            if (datosProcessados.length > 10) {
-                const moreMsg = document.createElement('p');
-                moreMsg.style.fontSize = '12px';
-                moreMsg.style.color = '#999';
-                moreMsg.style.marginTop = '1rem';
-                moreMsg.textContent = `+ ${datosProcessados.length - 10} registros más`;
-                document.querySelector('.table-wrapper').parentNode.insertBefore(moreMsg, document.querySelector('.table-wrapper').nextSibling);
-            }
         }
         
         function descargarCSV() {
@@ -522,16 +503,19 @@
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = 'FC_REAPERTURAS_' + new Date().getTime() + '.csv';
+            link.download = `${formatoDetectado}_GEOCODIFICADO_${new Date().getTime()}.csv`;
             link.click();
         }
         
         function generarCSV() {
             if (!datosProcessados.length) return '';
-            const encabezados = Object.keys(datosProcessados[0]);
-            let csv = encabezados.join(';') + '\n';
+            
+            // Mantener orden original de columnas + agregar x, y
+            const todasLasColumnas = [...columnasOriginales, 'x', 'y'];
+            let csv = todasLasColumnas.join(';') + '\n';
+            
             datosProcessados.forEach(fila => {
-                const valores = encabezados.map(header => {
+                const valores = todasLasColumnas.map(header => {
                     let valor = fila[header] || '';
                     if (valor.includes(';') || valor.includes('"')) {
                         valor = '"' + valor.replace(/"/g, '""') + '"';
@@ -547,43 +531,12 @@
             datosGlobales = [];
             datosProcessados = [];
             modoSeleccionado = null;
+            formatoDetectado = null;
+            columnasOriginales = [];
             fileInput.value = '';
             document.getElementById('configSection').classList.add('hidden');
             document.getElementById('previewSection').classList.add('hidden');
-        }
-        
-        function cargarPerfiles() {
-            const perfiles = JSON.parse(localStorage.getItem('perfilesGeo') || '[]');
-            const lista = document.getElementById('profilesList');
-            lista.innerHTML = '';
-            if (perfiles.length > 0) {
-                document.getElementById('profilesSection').style.display = 'block';
-                perfiles.forEach((p, idx) => {
-                    const div = document.createElement('div');
-                    div.className = 'profile-item';
-                    div.innerHTML = `<button class="profile-btn" onclick="usarPerfil(${idx})">${p.nombre}</button>`;
-                    lista.appendChild(div);
-                });
-            }
-        }
-        
-        function crearPerfil() {
-            const nombre = prompt('Nombre del perfil:', 'Perfil ' + new Date().toLocaleDateString());
-            if (!nombre) return;
-            const perfiles = JSON.parse(localStorage.getItem('perfilesGeo') || '[]');
-            perfiles.push({ nombre, modo: modoSeleccionado, fecha: new Date().toISOString() });
-            localStorage.setItem('perfilesGeo', JSON.stringify(perfiles));
-            cargarPerfiles();
-            alert('✓ Perfil guardado');
-        }
-        
-        function usarPerfil(idx) {
-            const perfiles = JSON.parse(localStorage.getItem('perfilesGeo') || '[]');
-            if (perfiles[idx]) {
-                modoSeleccionado = perfiles[idx].modo;
-                selectMode(modoSeleccionado);
-                alert('✓ Perfil cargado: ' + perfiles[idx].modo);
-            }
+            document.getElementById('formatDetected').classList.add('hidden');
         }
     </script>
 </body>
