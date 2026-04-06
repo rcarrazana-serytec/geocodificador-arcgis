@@ -221,7 +221,6 @@
         let datosProcessados = [];
         let modoSeleccionado = null;
         
-        // Base de datos local de localidades
         const coordenadaLocalidades = {
             'SALTA': {lat: '-24.789322', lon: '-65.410351'},
             'PICHANAL': {lat: '-24.068', lon: '-65.133'},
@@ -377,8 +376,8 @@
                 
                 return {
                     ...fila,
-                    'x': x,
-                    'y': y,
+                    'x': y,
+                    'y': x,
                     'dispositivo': '',
                     modo: modo
                 };
@@ -404,7 +403,6 @@
                     y = formatearCoordenada(lonOrig);
                     modo = 'Original';
                 } else {
-                    // Geocodificar con API
                     const calle = fila['CALLE_SERVICIO'] || '';
                     const numero = fila['NRO_CALLE_SERVICIO'] || '';
                     const provincia = fila['PROVINCIA_SERVICIO'] || '';
@@ -427,7 +425,6 @@
                             y = data.lon;
                             modo = 'API Nominatim';
                         } else {
-                            // Si falla, usa localidad como fallback
                             const coords = coordenadaLocalidades[localidad];
                             if (coords) {
                                 x = coords.lat;
@@ -440,7 +437,6 @@
                             }
                         }
                     } catch (error) {
-                        // Fallback a localidad si hay error
                         const coords = coordenadaLocalidades[localidad];
                         if (coords) {
                             x = coords.lat;
@@ -456,18 +452,16 @@
                 
                 datosProcessados.push({
                     ...fila,
-                    'x': x,
-                    'y': y,
+                    'x': y,
+                    'y': x,
                     'dispositivo': '',
                     modo: modo
                 });
                 
-                // Actualizar progreso
                 const porcentaje = Math.round((i + 1) / datosGlobales.length * 100);
                 document.getElementById('geoProgressFill').style.width = porcentaje + '%';
                 document.getElementById('geoStatus').textContent = `Procesando: ${i + 1}/${datosGlobales.length}`;
                 
-                // Pausa pequeña para no sobrecargar API
                 await new Promise(resolve => setTimeout(resolve, 100));
             }
             
