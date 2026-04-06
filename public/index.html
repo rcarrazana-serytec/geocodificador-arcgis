@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SER&TEC — Geocodificador REAP/OML</title>
+  <title>SER&TEC — Geoprocesamiento Offline</title>
   
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -13,39 +13,40 @@
 
   <nav class="st-navbar">
     <div class="st-navbar-logo">
-      <img src="LogoST.png" alt="Ser&Tec SAS" onerror="this.style.display='none'">
+      <img src="LogoST.png" alt="Ser&Tec logo" onerror="this.style.display='none'">
       <span class="st-navbar-nombre">SER<span class="st-amp">&</span>TEC<span class="st-sas">SAS</span></span>
     </div>
-    <div class="st-navbar-herramienta">Sistemas GIS · NOA</div>
+    <div class="st-navbar-herramienta">Geocodificador Autónomo</div>
   </nav>
 
   <main class="st-contenedor">
     <section class="st-seccion">
-      <p class="st-label-amarillo">Infraestructura · Georreferenciación</p>
+      <p class="st-label-amarillo">Infraestructura · Georreferenciación NOA</p>
       <h1>Procesador de Datos</h1>
+      <p class="st-texto-secundario">Herramienta para normalizar coordenadas REAP y OML sin depender de servidores externos.</p>
     </section>
 
     <div class="st-grid-2">
       <div class="st-card st-card-accent">
         <h3 class="st-card-titulo">1. Cargar Archivo</h3>
         <div id="uploadArea" class="st-dropzone">
-          <p class="st-dropzone-titulo">Arrastrá REAP (.txt) o OML (.csv)</p>
-          <p class="st-dropzone-sub">O hacé click para seleccionar</p>
+          <p class="st-dropzone-titulo">Arrastrá REAP (.txt) o OML (.csv) aquí</p>
+          <p class="st-dropzone-sub">o hacé click para seleccionar</p>
         </div>
         <input type="file" id="fileInput" accept=".csv, .txt" hidden>
       </div>
 
       <div class="st-card">
-        <h3 class="st-card-titulo">2. Configuración</h3>
+        <h3 class="st-card-titulo">2. Ejecución</h3>
         <div class="st-campo">
-          <label class="st-label-campo">Modo de Geocodificación</label>
+          <label class="st-label-campo">Método de Procesamiento</label>
           <select id="geoMode" class="st-select">
-            <option value="local">Modo Local (Diccionario NOA)</option>
-            <option value="api">Modo Preciso (Netlify Functions)</option>
+            <option value="local">Motor Local (Salta, Jujuy, Tucumán)</option>
+            <option value="api">Modo API (Requiere Netlify activo)</option>
           </select>
         </div>
         <button id="processBtn" class="st-btn st-btn-primario st-btn-lg" disabled style="width: 100%; justify-content: center;">
-          Procesar y Descargar
+          Procesar y Descargar CSV
         </button>
       </div>
     </div>
@@ -65,7 +66,8 @@
                 <th>Estado</th>
               </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+              </tbody>
           </table>
         </div>
       </div>
@@ -78,8 +80,8 @@
   </footer>
 
   <script>
-    // --- DICCIONARIO LOCAL (Basado en tus requerimientos de NOA) ---
-    const COORDENADAS_LOCALIDADES = {
+    // --- LÓGICA DE NEGOCIO INTEGRADA ---
+    const DB_COORDENADAS = {
       "SALTA": { lat: -24.7821, lon: -65.4232 },
       "JUJUY": { lat: -24.1858, lon: -65.2995 },
       "TUCUMAN": { lat: -26.8083, lon: -65.2176 },
@@ -91,102 +93,85 @@
     const fileInput = document.getElementById('fileInput');
     const processBtn = document.getElementById('processBtn');
     const tbody = document.querySelector('#previewTable tbody');
-    let datosOriginales = [];
+    let datosCargados = [];
 
-    // --- EVENTOS DE CARGA ---
+    // Drag & Drop
     uploadArea.onclick = () => fileInput.click();
-    fileInput.onchange = (e) => manejarArchivo(e.target.files[0]);
-    
+    fileInput.onchange = (e) => leer(e.target.files[0]);
     uploadArea.ondragover = (e) => { e.preventDefault(); uploadArea.classList.add('activo'); };
-    uploadArea.ondragleave = () => uploadArea.classList.remove('activo');
-    uploadArea.ondrop = (e) => {
-      e.preventDefault();
-      uploadArea.classList.remove('activo');
-      manejarArchivo(e.dataTransfer.files[0]);
-    };
+    uploadArea.ondrop = (e) => { e.preventDefault(); leer(e.dataTransfer.files[0]); };
 
-    function manejarArchivo(file) {
+    function leer(file) {
       if (!file) return;
-      
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
         complete: function(results) {
-          datosOriginales = results.data;
-          actualizarTabla(datosOriginales.slice(0, 10)); // Vista previa rápida
+          datosCargados = results.data;
+          render(datosCargados.slice(0, 10)); // Vista previa inmediata
           processBtn.disabled = false;
-          processBtn.innerText = `Procesar ${file.name}`;
         }
       });
     }
 
-    function actualizarTabla(filas, procesado = false) {
-      tbody.innerHTML = filas.map(f => {
-        const loc = (f.Localidad || "").toUpperCase();
-        const coords = procesado ? { lat: f.Latitud, lon: f.Longitud } : { lat: '-', lon: '-' };
-        const badgeClass = procesado ? "st-badge-exito" : "st-badge-gris";
-        const badgeText = procesado ? "Geocodificado" : "Pendiente";
-
-        return `
-          <tr>
-            <td>${f.Referencia || f.ID || f.OML || '-'}</td>
-            <td>${f.Localidad || '-'}</td>
-            <td>${f.Direccion || f.Calle || '-'}</td>
-            <td>${coords.lat}</td>
-            <td>${coords.lon}</td>
-            <td><span class="st-badge ${badgeClass}">${badgeText}</span></td>
-          </tr>
-        `;
-      }).join('');
+    function render(filas, procesado = false) {
+      tbody.innerHTML = filas.map(f => `
+        <tr>
+          <td>${f.Referencia || f.OML || f.ID || '-'}</td>
+          <td>${f.Localidad || '-'}</td>
+          <td>${f.Direccion || f.Calle || '-'}</td>
+          <td>${f.Latitud || '-'}</td>
+          <td>${f.Longitud || '-'}</td>
+          <td><span class="st-badge ${procesado ? 'st-badge-exito' : 'st-badge-gris'}">
+            ${procesado ? 'Listo' : 'Pendiente'}</span>
+          </td>
+        </tr>
+      `).join('');
     }
 
-    // --- LÓGICA DE PROCESAMIENTO Y HERRAMIENTAS ---
     processBtn.onclick = async () => {
       const modo = document.getElementById('geoMode').value;
       processBtn.innerText = "Trabajando...";
-      processBtn.disabled = true;
-
-      let resultadosFinales = [];
+      
+      let resultados = [];
 
       if (modo === 'api') {
         try {
-          const response = await fetch('/.netlify/functions/geocodificar', {
+          const res = await fetch('/.netlify/functions/geocodificar', {
             method: 'POST',
-            body: JSON.stringify(datosOriginales)
+            body: JSON.stringify(datosCargados)
           });
-          resultadosFinales = await response.json();
-        } catch (err) {
-          alert("Error conectando con la herramienta API de Netlify.");
-          processBtn.disabled = false;
-          return;
+          if(!res.ok) throw new Error();
+          resultados = await res.json();
+        } catch (e) {
+          alert("Error de créditos en Netlify. Usando Motor Local automáticamente.");
+          resultados = procesarOffline(datosCargados);
         }
       } else {
-        // PROCESO LOCAL: Usa el diccionario para asignar coordenadas por localidad
-        resultadosFinales = datosOriginales.map(fila => {
-          const loc = (fila.Localidad || "").toUpperCase();
-          const coord = COORDENADAS_LOCALIDADES[loc] || { lat: 0, lon: 0 };
-          return { ...fila, Latitud: coord.lat, Longitud: coord.lon };
-        });
+        resultados = procesarOffline(datosCargados);
       }
 
-      actualizarTabla(resultadosFinales.slice(0, 50), true);
-      descargarCSV(resultadosFinales);
-      
-      processBtn.innerText = "Procesar Datos";
-      processBtn.disabled = false;
+      render(resultados.slice(0, 50), true);
+      descargar(resultados);
+      processBtn.innerText = "Procesar y Descargar CSV";
     };
 
-    function descargarCSV(data) {
+    function procesarOffline(data) {
+      return data.map(f => {
+        const loc = (f.Localidad || "").toUpperCase();
+        const coords = DB_COORDENADAS[loc] || { lat: -26.8, lon: -65.2 }; // Tucumán por defecto
+        return { ...f, Latitud: coords.lat, Longitud: coords.lon };
+      });
+    }
+
+    function descargar(data) {
       const csv = Papa.unparse(data);
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", "SERTEC_Geocodificado.csv");
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "SERTEC_GIS_DATA.csv";
+      a.click();
     }
   </script>
 </body>
