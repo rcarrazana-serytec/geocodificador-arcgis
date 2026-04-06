@@ -1,192 +1,95 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geocodificador Híbrido — SER&TEC</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="sertec-brand.css">
-
-    <style>
-        /* Ajustes específicos para esta herramienta que no están en el CSS base */
-        .upload-area {
-            border: 2px dashed var(--st-gris-claro);
-            border-radius: 8px;
-            padding: 3rem 2rem;
-            text-align: center;
-            background: var(--st-blanco);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .upload-area:hover { border-color: var(--st-amarillo); background: var(--st-amarillo-tenue); }
-        .upload-area.dragging { border-color: var(--st-amarillo); background: var(--st-amarillo-tenue); }
-        
-        input[type="file"] { display: none; }
-        
-        .mode-option { 
-            border: 2px solid var(--st-gris-superficie); 
-            border-radius: 8px;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: var(--st-blanco);
-        }
-        .mode-option:hover { border-color: var(--st-amarillo-claro); }
-        .mode-option.selected { 
-            border-color: var(--st-amarillo); 
-            background: var(--st-amarillo-tenue); 
-        }
-        
-        .hidden { display: none !important; }
-        .geocoding-progress { margin: 1.5rem 0; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SER&TEC — Geocodificador REAP/OML</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="sertec-brand.css">
 </head>
-<body>
+<body class="st-pagina">
 
-    <nav class="st-navbar">
-        <a href="#" class="st-navbar-logo">
-            <img src="LogoST.png" alt="Ser&Tec">
-            <div class="st-navbar-nombre">SER<span class="st-amp">&</span>TEC <span class="st-sas">SAS</span></div>
-        </a>
-        <div class="st-navbar-herramienta">Geocodificador Híbrido</div>
-        <div class="st-navbar-links">
-            <button class="st-btn st-btn-ghost st-btn-sm" onclick="reiniciar()">Reiniciar</button>
+  <nav class="st-navbar">
+    <div class="st-navbar-logo">
+      <img src="LogoST.png" alt="Ser&Tec SAS">
+      <span class="st-navbar-nombre">SER<span class="st-amp">&</span>TEC<span class="st-sas">SAS</span></span>
+    </div>
+    <div class="st-navbar-herramienta">Geocodificador ArcGIS</div>
+  </nav>
+
+  <main class="st-contenedor">
+    
+    <section class="st-seccion">
+      <p class="st-label-amarillo">Infraestructura · Georreferenciación</p>
+      <h1>Procesador de Datos</h1>
+      <p class="st-texto-secundario">Herramienta para asignar coordenadas a registros REAP y OML de Naturgy.</p>
+    </section>
+
+    <div class="st-grid-2">
+      <div class="st-card st-card-accent">
+        <h3 class="st-card-titulo">1. Cargar Archivo</h3>
+        <div id="uploadArea" class="st-dropzone">
+          <div class="st-dropzone-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E6A817" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+            </svg>
+          </div>
+          <p class="st-dropzone-titulo">Arrastrá el Excel o CSV aquí</p>
+          <p class="st-dropzone-sub">Formatos soportados: .csv, .xlsx</p>
         </div>
-    </nav>
+        <input type="file" id="fileInput" hidden>
+      </div>
 
-    <main class="st-pagina">
-        <div class="st-contenedor">
-            
-            <header class="st-seccion">
-                <p class="st-label-amarillo">Sistemas GIS · Salta & Jujuy</p>
-                <h1>Procesamiento Multi-Formato</h1>
-                <p class="st-texto-secundario">Herramienta para normalizar coordenadas REAP, OML y ArcGIS.</p>
-            </header>
-
-            <section class="st-seccion">
-                <div class="st-card">
-                    <div class="st-card-titulo">1. Cargar Archivo de Datos</div>
-                    <div class="upload-area" id="uploadArea">
-                        <p style="font-weight: 600; margin-bottom: 8px;">Arrastra tu archivo REAP (.txt) u OML (.csv)</p>
-                        <p class="st-texto-secundario">O hacé click para buscar en tu equipo</p>
-                        <input type="file" id="fileInput" accept=".txt,.csv" />
-                    </div>
-                </div>
-            </section>
-
-            <section id="previewInitialSection" class="st-seccion hidden">
-                <div class="st-card">
-                    <div class="st-card-titulo">2. Vista previa de datos originales</div>
-                    <div id="formatDetected" class="st-badge st-badge-info" style="margin-bottom: 1.5rem;"></div>
-                    
-                    <div class="st-grid-3">
-                        <div class="st-card st-card-accent">
-                            <div class="st-label-amarillo">Registros Detectados</div>
-                            <div class="st-text-2xl" id="totalRowCount" style="font-weight: 800; font-family: var(--st-font-titulo);">0</div>
-                        </div>
-                    </div>
-
-                    <div class="st-tabla-wrapper" style="margin-top: 1.5rem;">
-                        <table class="st-table">
-                            <thead>
-                                <tr>
-                                    <th>NRO_SERVICIO</th>
-                                    <th>LOCALIDAD</th>
-                                    <th>LAT Original</th>
-                                    <th>LON Original</th>
-                                </tr>
-                            </thead>
-                            <tbody id="previewInitialTable"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section id="configSection" class="st-seccion hidden">
-                <div class="st-card">
-                    <div class="st-card-titulo">3. Seleccionar modo de geocodificación</div>
-                    
-                    <div class="st-grid-2" id="modeSelector" style="gap: 20px;">
-                        <div class="mode-option" onclick="selectMode('local')">
-                            <div style="font-family: var(--st-font-titulo); font-weight: 700; color: var(--st-gris-oscuro);">⚡ MODO RÁPIDO</div>
-                            <p class="st-texto-secundario">Usa base de datos interna por localidad. Instantáneo.</p>
-                        </div>
-                        <div class="mode-option" onclick="selectMode('api')">
-                            <div style="font-family: var(--st-font-titulo); font-weight: 700; color: var(--st-gris-oscuro);">🎯 MODO PRECISO (API)</div>
-                            <p class="st-texto-secundario">Busca dirección exacta. Recomendado para menos de 50 registros.</p>
-                        </div>
-                    </div>
-
-                    <div id="modeInfo" class="st-alert st-alert-info" style="margin: 1.5rem 0;"></div>
-
-                    <div style="display: flex; gap: 12px;">
-                        <button class="st-btn st-btn-primario" id="processBtn" onclick="procesarDatos()" disabled>Procesar datos</button>
-                        <button class="st-btn st-btn-secundario" onclick="reiniciar()">Limpiar</button>
-                    </div>
-                </div>
-            </section>
-
-            <section id="previewSection" class="st-seccion hidden">
-                <div class="st-card">
-                    <div class="st-card-titulo">4. Resultados Procesados</div>
-
-                    <div id="geocodingContainer" style="display: none; margin-bottom: 2rem;">
-                        <div class="st-alert st-alert-warning">⏳ Geocodificando registros... por favor no cierres la pestaña.</div>
-                        <div class="geocoding-progress">
-                            <div class="st-progress"><div class="st-progress-bar" id="geoProgressFill" style="width: 0%"></div></div>
-                            <p class="st-texto-secundario" id="geoStatus" style="margin-top: 8px;">Procesando: 0/0</p>
-                        </div>
-                    </div>
-
-                    <div class="st-grid-3">
-                        <div class="st-card" style="border: 1px solid var(--st-gris-superficie);">
-                            <div class="st-label-amarillo">Total</div>
-                            <div class="st-text-xl" id="processedCount" style="font-weight: 700;">0</div>
-                        </div>
-                        <div class="st-card" style="border: 1px solid var(--st-gris-superficie);">
-                            <div class="st-badge st-badge-exito">Con Coordenadas</div>
-                            <div class="st-text-xl" id="withCoords" style="font-weight: 700;">0</div>
-                        </div>
-                        <div class="st-card" style="border: 1px solid var(--st-gris-superficie);">
-                            <div class="st-badge st-badge-error">Sin Coordenadas</div>
-                            <div class="st-text-xl" id="withoutCoords" style="font-weight: 700;">0</div>
-                        </div>
-                    </div>
-
-                    <div class="st-tabla-wrapper" style="margin-top: 2rem;">
-                        <table class="st-table">
-                            <thead>
-                                <tr>
-                                    <th>NRO_SERVICIO</th>
-                                    <th>LOCALIDAD</th>
-                                    <th>X (LONG)</th>
-                                    <th>Y (LAT)</th>
-                                    <th>MODO</th>
-                                </tr>
-                            </thead>
-                            <tbody id="previewTable"></tbody>
-                        </table>
-                    </div>
-
-                    <div style="margin-top: 2rem; display: flex; gap: 12px;">
-                        <button class="st-btn st-btn-primario" id="downloadBtn" onclick="descargarCSV()">⬇️ Descargar CSV para ArcGIS</button>
-                        <button class="st-btn st-btn-ghost" onclick="reiniciar()">Cargar otro archivo</button>
-                    </div>
-                </div>
-            </section>
-
+      <div class="st-card">
+        <h3 class="st-card-titulo">2. Configuración</h3>
+        <div class="st-campo">
+          <label class="st-label-campo">Modo de Geocodificación</label>
+          <select id="geoMode" class="st-select">
+            <option value="local">Modo Local (Rápido - Por Localidad)</option>
+            <option value="api">Modo Preciso (API - Por Dirección)</option>
+          </select>
         </div>
-    </main>
+        <button id="processBtn" class="st-btn st-btn-primario st-btn-lg" disabled style="width: 100%; justify-content: center;">
+          Procesar Datos
+        </button>
+      </div>
+    </div>
 
-    <footer class="st-footer">
-        <div class="st-footer-logo">SER<span class="st-amp">&</span>TEC</div>
-        <div>© 2026 · Servicios y Tecnología · Tucumán, Argentina</div>
-    </footer>
+    <section class="st-seccion">
+      <div class="st-card">
+        <h3 class="st-card-titulo">Vista Previa y Resultados</h3>
+        <div class="st-tabla-wrapper">
+          <table id="previewTable" class="st-tabla">
+            <thead>
+              <tr>
+                <th>Referencia</th>
+                <th>Localidad</th>
+                <th>Dirección</th>
+                <th class="st-col-amarillo">Latitud</th>
+                <th class="st-col-amarillo">Longitud</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
-    <script>
-        /* ... (Acá pegas todo tu bloque <script> original, funciona perfectamente con esta estructura) ... */
-    </script>
+  </main>
+
+  <footer class="st-footer">
+    <div class="st-footer-logo">SER<span class="st-amp">&</span>TEC</div>
+    <div>© 2026 · Servicios y Tecnología · NOA, Argentina</div>
+  </footer>
+
+  <script>
+    // Aquí debés pegar la lógica de JavaScript que ya tenías 
+    // para leer el archivo y procesar las coordenadas.
+    // Solo asegurate de usar los IDs: uploadArea, geoMode y processBtn.
+  </script>
 </body>
 </html>
