@@ -420,7 +420,7 @@
                     }
                 }
                 
-                return { ...fila, 'x': x, 'y': y, modo: modo };
+                return { ...fila, 'x': y, 'y': x, modo: modo };
             });
             
             mostrarPreview();
@@ -472,7 +472,7 @@
                     }
                 }
                 
-                datosProcessados.push({ ...fila, 'x': x, 'y': y, modo: modo });
+                datosProcessados.push({ ...fila, 'x': y, 'y': x, modo: modo });
                 
                 const porcentaje = Math.round((i + 1) / datosGlobales.length * 100);
                 document.getElementById('geoProgressFill').style.width = porcentaje + '%';
