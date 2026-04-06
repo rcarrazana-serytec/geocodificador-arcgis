@@ -455,8 +455,8 @@
                         const data = await response.json();
                         
                         if (data.success) {
-                            x = data.lat.replace('.', ',');
-                            y = data.lon.replace('.', ',');
+                            x = data.lon.replace('.', ',');
+                            y = data.lat.replace('.', ',');
                             modo = 'API';
                         } else {
                             const coords = coordenadaLocalidades[localidad];
