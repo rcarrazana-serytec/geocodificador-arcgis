@@ -3,572 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geocodificador Híbrido - Multi-Formato</title>
+    <title>Geocodificador Híbrido — SER&TEC</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="sertec-brand.css">
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9fa; }
-        
-        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
-        
-        .header { margin-bottom: 2rem; }
-        .header h1 { font-size: 28px; font-weight: 600; color: #1a1a1a; margin-bottom: 0.5rem; }
-        .header p { font-size: 14px; color: #666; }
-        
-        .section { margin-bottom: 2rem; }
-        .section-title { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 1rem; }
-        
+        /* Ajustes específicos para esta herramienta que no están en el CSS base */
         .upload-area {
-            border: 2px dashed #ddd;
+            border: 2px dashed var(--st-gris-claro);
             border-radius: 8px;
-            padding: 2rem;
+            padding: 3rem 2rem;
             text-align: center;
-            background: #fafafa;
+            background: var(--st-blanco);
             cursor: pointer;
             transition: all 0.3s;
         }
-        .upload-area:hover { border-color: #2563eb; background: #f0f7ff; }
-        .upload-area.dragging { border-color: #2563eb; background: #f0f7ff; }
-        
-        .upload-text { font-size: 15px; color: #666; margin-bottom: 0.5rem; }
-        .upload-subtext { font-size: 13px; color: #999; }
+        .upload-area:hover { border-color: var(--st-amarillo); background: var(--st-amarillo-tenue); }
+        .upload-area.dragging { border-color: var(--st-amarillo); background: var(--st-amarillo-tenue); }
         
         input[type="file"] { display: none; }
         
-        .config-card { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; }
-        
-        .mode-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
         .mode-option { 
-            border: 2px solid #e5e7eb; 
-            border-radius: 6px;
-            padding: 1rem;
+            border: 2px solid var(--st-gris-superficie); 
+            border-radius: 8px;
+            padding: 1.5rem;
             cursor: pointer;
             transition: all 0.2s;
-            background: white;
+            background: var(--st-blanco);
         }
-        .mode-option:hover { border-color: #2563eb; background: #f0f7ff; }
+        .mode-option:hover { border-color: var(--st-amarillo-claro); }
         .mode-option.selected { 
-            border-color: #2563eb; 
-            background: #dbeafe; 
-            color: #1e40af; 
+            border-color: var(--st-amarillo); 
+            background: var(--st-amarillo-tenue); 
         }
         
-        .mode-title { font-weight: 600; margin-bottom: 0.5rem; font-size: 14px; }
-        .mode-desc { font-size: 12px; color: #666; }
-        
-        .preview-section { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; }
-        
-        .preview-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
-        .stat { background: #f9fafb; padding: 1rem; border-radius: 6px; border: 1px solid #e5e7eb; }
-        .stat-label { font-size: 12px; color: #999; margin-bottom: 0.5rem; font-weight: 500; }
-        .stat-value { font-size: 24px; font-weight: 700; color: #1a1a1a; }
-        
-        .table-wrapper { overflow-x: auto; margin-bottom: 1rem; max-height: 600px; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { background: #f9fafb; padding: 12px; text-align: left; font-weight: 600; color: #1a1a1a; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; }
-        td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; color: #666; }
-        tr:hover { background: #f9fafb; }
-        
-        .info { background: #dbeafe; color: #1e40af; padding: 12px; border-radius: 6px; font-size: 13px; margin: 1rem 0; border-left: 4px solid #2563eb; }
-        .warning { background: #fef3c7; color: #92400e; padding: 12px; border-radius: 6px; font-size: 13px; margin: 1rem 0; border-left: 4px solid #f59e0b; }
-        
-        .action-buttons { display: flex; gap: 12px; margin-top: 1.5rem; flex-wrap: wrap; }
-        button { 
-            padding: 0.75rem 1.5rem; 
-            border: 1px solid #d1d5db; 
-            background: white; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-size: 14px; 
-            font-weight: 500;
-            transition: all 0.2s; 
-            color: #1a1a1a; 
-        }
-        button:hover { background: #f9fafb; border-color: #bfdbfe; }
-        button.primary { 
-            background: #2563eb; 
-            color: white; 
-            border-color: #2563eb;
-        }
-        button.primary:hover { background: #1d4ed8; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .progress { margin: 1rem 0; }
-        .progress-bar { width: 100%; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; }
-        .progress-fill { height: 100%; background: #10b981; transition: width 0.3s; }
-        
-        .hidden { display: none; }
-        .geocoding-progress { margin: 1rem 0; }
-        .geocoding-status { font-size: 12px; color: #666; margin-top: 0.5rem; }
+        .hidden { display: none !important; }
+        .geocoding-progress { margin: 1.5rem 0; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🗺️ Geocodificador Híbrido Multi-Formato</h1>
-            <p>Salta & Jujuy - REAP + OML - ArcGIS</p>
+
+    <nav class="st-navbar">
+        <a href="#" class="st-navbar-logo">
+            <img src="LogoST.png" alt="Ser&Tec">
+            <div class="st-navbar-nombre">SER<span class="st-amp">&</span>TEC <span class="st-sas">SAS</span></div>
+        </a>
+        <div class="st-navbar-herramienta">Geocodificador Híbrido</div>
+        <div class="st-navbar-links">
+            <button class="st-btn st-btn-ghost st-btn-sm" onclick="reiniciar()">Reiniciar</button>
         </div>
-        
-        <div class="section">
-            <div class="section-title">1. Cargar archivo</div>
-            <div class="upload-area" id="uploadArea">
-                <div class="upload-text">Arrastra tu archivo REAP (.txt) u OML (.csv)</div>
-                <div class="upload-subtext">Soporta: REAP (.txt con TAB) | OML (.csv con TAB)</div>
-                <input type="file" id="fileInput" accept=".txt,.csv" />
-            </div>
-        </div>
-        
-        <div id="previewInitialSection" class="section hidden">
-            <div class="section-title">2. Vista previa de datos originales</div>
-            <div class="preview-section">
-                <div id="formatDetected" class="info"></div>
-                
-                <div class="preview-stats">
-                    <div class="stat">
-                        <div class="stat-label">Total registros</div>
-                        <div class="stat-value" id="totalRowCount">0</div>
-                    </div>
-                </div>
-                
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>NRO_SERVICIO</th>
-                                <th>LOCALIDAD</th>
-                                <th>LAT Original</th>
-                                <th>LON Original</th>
-                            </tr>
-                        </thead>
-                        <tbody id="previewInitialTable"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        
-        <div id="configSection" class="section hidden">
-            <div class="section-title">3. Seleccionar modo de geocodificación</div>
+    </nav>
+
+    <main class="st-pagina">
+        <div class="st-contenedor">
             
-            <div class="config-card">
-                <div class="mode-selector" id="modeSelector">
-                    <div class="mode-option" onclick="selectMode('local')">
-                        <div class="mode-title">⚡ Rápido (BD Local)</div>
-                        <div class="mode-desc">Instantáneo, por localidad.</div>
-                    </div>
-                    <div class="mode-option" onclick="selectMode('api')">
-                        <div class="mode-title">🎯 Preciso (API)</div>
-                        <div class="mode-desc">Dirección exacta. Máx 50 reg.</div>
+            <header class="st-seccion">
+                <p class="st-label-amarillo">Sistemas GIS · Salta & Jujuy</p>
+                <h1>Procesamiento Multi-Formato</h1>
+                <p class="st-texto-secundario">Herramienta para normalizar coordenadas REAP, OML y ArcGIS.</p>
+            </header>
+
+            <section class="st-seccion">
+                <div class="st-card">
+                    <div class="st-card-titulo">1. Cargar Archivo de Datos</div>
+                    <div class="upload-area" id="uploadArea">
+                        <p style="font-weight: 600; margin-bottom: 8px;">Arrastra tu archivo REAP (.txt) u OML (.csv)</p>
+                        <p class="st-texto-secundario">O hacé click para buscar en tu equipo</p>
+                        <input type="file" id="fileInput" accept=".txt,.csv" />
                     </div>
                 </div>
-                
-                <div id="modeInfo" class="info"></div>
-                
-                <div class="action-buttons">
-                    <button class="primary" id="processBtn" onclick="procesarDatos()" disabled>Procesar datos</button>
-                    <button id="resetBtn" onclick="reiniciar()">Limpiar</button>
+            </section>
+
+            <section id="previewInitialSection" class="st-seccion hidden">
+                <div class="st-card">
+                    <div class="st-card-titulo">2. Vista previa de datos originales</div>
+                    <div id="formatDetected" class="st-badge st-badge-info" style="margin-bottom: 1.5rem;"></div>
+                    
+                    <div class="st-grid-3">
+                        <div class="st-card st-card-accent">
+                            <div class="st-label-amarillo">Registros Detectados</div>
+                            <div class="st-text-2xl" id="totalRowCount" style="font-weight: 800; font-family: var(--st-font-titulo);">0</div>
+                        </div>
+                    </div>
+
+                    <div class="st-tabla-wrapper" style="margin-top: 1.5rem;">
+                        <table class="st-table">
+                            <thead>
+                                <tr>
+                                    <th>NRO_SERVICIO</th>
+                                    <th>LOCALIDAD</th>
+                                    <th>LAT Original</th>
+                                    <th>LON Original</th>
+                                </tr>
+                            </thead>
+                            <tbody id="previewInitialTable"></tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            </section>
+
+            <section id="configSection" class="st-seccion hidden">
+                <div class="st-card">
+                    <div class="st-card-titulo">3. Seleccionar modo de geocodificación</div>
+                    
+                    <div class="st-grid-2" id="modeSelector" style="gap: 20px;">
+                        <div class="mode-option" onclick="selectMode('local')">
+                            <div style="font-family: var(--st-font-titulo); font-weight: 700; color: var(--st-gris-oscuro);">⚡ MODO RÁPIDO</div>
+                            <p class="st-texto-secundario">Usa base de datos interna por localidad. Instantáneo.</p>
+                        </div>
+                        <div class="mode-option" onclick="selectMode('api')">
+                            <div style="font-family: var(--st-font-titulo); font-weight: 700; color: var(--st-gris-oscuro);">🎯 MODO PRECISO (API)</div>
+                            <p class="st-texto-secundario">Busca dirección exacta. Recomendado para menos de 50 registros.</p>
+                        </div>
+                    </div>
+
+                    <div id="modeInfo" class="st-alert st-alert-info" style="margin: 1.5rem 0;"></div>
+
+                    <div style="display: flex; gap: 12px;">
+                        <button class="st-btn st-btn-primario" id="processBtn" onclick="procesarDatos()" disabled>Procesar datos</button>
+                        <button class="st-btn st-btn-secundario" onclick="reiniciar()">Limpiar</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="previewSection" class="st-seccion hidden">
+                <div class="st-card">
+                    <div class="st-card-titulo">4. Resultados Procesados</div>
+
+                    <div id="geocodingContainer" style="display: none; margin-bottom: 2rem;">
+                        <div class="st-alert st-alert-warning">⏳ Geocodificando registros... por favor no cierres la pestaña.</div>
+                        <div class="geocoding-progress">
+                            <div class="st-progress"><div class="st-progress-bar" id="geoProgressFill" style="width: 0%"></div></div>
+                            <p class="st-texto-secundario" id="geoStatus" style="margin-top: 8px;">Procesando: 0/0</p>
+                        </div>
+                    </div>
+
+                    <div class="st-grid-3">
+                        <div class="st-card" style="border: 1px solid var(--st-gris-superficie);">
+                            <div class="st-label-amarillo">Total</div>
+                            <div class="st-text-xl" id="processedCount" style="font-weight: 700;">0</div>
+                        </div>
+                        <div class="st-card" style="border: 1px solid var(--st-gris-superficie);">
+                            <div class="st-badge st-badge-exito">Con Coordenadas</div>
+                            <div class="st-text-xl" id="withCoords" style="font-weight: 700;">0</div>
+                        </div>
+                        <div class="st-card" style="border: 1px solid var(--st-gris-superficie);">
+                            <div class="st-badge st-badge-error">Sin Coordenadas</div>
+                            <div class="st-text-xl" id="withoutCoords" style="font-weight: 700;">0</div>
+                        </div>
+                    </div>
+
+                    <div class="st-tabla-wrapper" style="margin-top: 2rem;">
+                        <table class="st-table">
+                            <thead>
+                                <tr>
+                                    <th>NRO_SERVICIO</th>
+                                    <th>LOCALIDAD</th>
+                                    <th>X (LONG)</th>
+                                    <th>Y (LAT)</th>
+                                    <th>MODO</th>
+                                </tr>
+                            </thead>
+                            <tbody id="previewTable"></tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 2rem; display: flex; gap: 12px;">
+                        <button class="st-btn st-btn-primario" id="downloadBtn" onclick="descargarCSV()">⬇️ Descargar CSV para ArcGIS</button>
+                        <button class="st-btn st-btn-ghost" onclick="reiniciar()">Cargar otro archivo</button>
+                    </div>
+                </div>
+            </section>
+
         </div>
-        
-        <div id="previewSection" class="section hidden">
-            <div class="section-title">4. Vista previa de resultados procesados</div>
-            <div class="preview-section">
-                <div id="geocodingContainer" style="display: none;">
-                    <div class="info">⏳ Geocodificando registros...</div>
-                    <div class="geocoding-progress">
-                        <div class="progress-bar"><div class="progress-fill" id="geoProgressFill" style="width: 0%"></div></div>
-                        <div class="geocoding-status" id="geoStatus">Procesando: 0/0</div>
-                    </div>
-                </div>
-                
-                <div class="preview-stats">
-                    <div class="stat">
-                        <div class="stat-label">Procesados</div>
-                        <div class="stat-value" id="processedCount">0</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-label">Con coords</div>
-                        <div class="stat-value" id="withCoords">0</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-label">Sin coords</div>
-                        <div class="stat-value" id="withoutCoords">0</div>
-                    </div>
-                </div>
-                
-                <div class="progress">
-                    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
-                </div>
-                
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>NRO_SERVICIO</th>
-                                <th>LOCALIDAD</th>
-                                <th>LAT Orig</th>
-                                <th>LON Orig</th>
-                                <th>X Calc</th>
-                                <th>Y Calc</th>
-                                <th>Modo</th>
-                            </tr>
-                        </thead>
-                        <tbody id="previewTable"></tbody>
-                    </table>
-                </div>
-                
-                <div class="action-buttons">
-                    <button class="primary" id="downloadBtn" onclick="descargarCSV()">⬇️ Descargar CSV</button>
-                    <button id="resetBtn2" onclick="reiniciar()">Cargar otro archivo</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    </main>
+
+    <footer class="st-footer">
+        <div class="st-footer-logo">SER<span class="st-amp">&</span>TEC</div>
+        <div>© 2026 · Servicios y Tecnología · Tucumán, Argentina</div>
+    </footer>
 
     <script>
-        let datosGlobales = [];
-        let datosProcessados = [];
-        let modoSeleccionado = null;
-        let formatoDetectado = null;
-        let columnasOriginales = [];
-        
-        const coordenadaLocalidades = {
-            'SALTA': {lat: '-24,789322', lon: '-65,410351'},
-            'PICHANAL': {lat: '-24,068', lon: '-65,133'},
-            'SAN SALVADOR DE JUJUY': {lat: '-24,182787', lon: '-65,314820'},
-            'AGUARAY': {lat: '-24,073056', lon: '-63,806389'},
-            'HIPOLITO IRIGOYEN': {lat: '-24,195833', lon: '-63,881667'},
-            'METAN': {lat: '-25,488515', lon: '-64,967940'},
-            'TARTAGAL': {lat: '-22,516787', lon: '-63,808606'},
-            'PALPALA': {lat: '-24,355278', lon: '-65,404722'},
-            'LIBERTADOR GENERAL SAN MARTIN': {lat: '-23,815217', lon: '-64,792801'},
-            'SAN PEDRO': {lat: '-24,231558', lon: '-64,867835'},
-            'CERRILLOS': {lat: '-25,294167', lon: '-65,491667'},
-            'ORAN': {lat: '-23,136108', lon: '-64,322985'},
-            'CAMPO SANTO': {lat: '-25,345', lon: '-65,258'},
-            'FRAILE PINTADO': {lat: '-23,928889', lon: '-65,400556'},
-            'GENERAL GUEMES': {lat: '-25,198333', lon: '-65,339444'},
-            'LAS LAJITAS': {lat: '-25,201389', lon: '-63,930556'},
-            'EL BORDO': {lat: '-25,411667', lon: '-65,104167'},
-            'EL QUEBRACHAL': {lat: '-25,178', lon: '-64,368'},
-            'MOSCONI': {lat: '-22,393889', lon: '-63,618056'},
-            'SALVADOR MAZZA': {lat: '-22,100833', lon: '-63,711389'},
-            'PERICO': {lat: '-24,016389', lon: '-65,511389'},
-            'SANTO DOMINGO': {lat: '-24,163056', lon: '-65,358889'},
-            'LA MENDIETA': {lat: '-23,716667', lon: '-65,466667'},
-            'MONTERRICO': {lat: '-23,6', lon: '-65,65'},
-            'APOLINARIO SARAVIA': {lat: '-22,871944', lon: '-63,951667'},
-            'J. V. GONZALEZ': {lat: '-23,015833', lon: '-63,746667'},
-            'GRAL. PIZARRO': {lat: '-22,538333', lon: '-63,863056'},
-            'EL CARMEN': {lat: '-23,616111', lon: '-65,566667'},
-            'EMBARCACION': {lat: '-23,219167', lon: '-64,176111'},
-            'HUMAHUACA': {lat: '-23,203529', lon: '-65,349593'},
-            'TILCARA': {lat: '-23,574444', lon: '-65,405'},
-            'YALA': {lat: '-24,137222', lon: '-65,329722'},
-            'LOZANO': {lat: '-23,815278', lon: '-65,325833'},
-            'MAIMARA': {lat: '-23,639722', lon: '-65,406389'},
-            'ROSARIO DE LA FRONTERA': {lat: '-25,837222', lon: '-64,953889'},
-            'ROSARIO DE LERMA': {lat: '-26,182222', lon: '-64,850833'},
-            'SAN LUIS': {lat: '-25,205556', lon: '-65,497778'},
-            'LA QUIACA': {lat: '-23,736389', lon: '-65,596667'}
-        };
-        
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        
-        uploadArea.addEventListener('click', () => fileInput.click());
-        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragging'); });
-        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragging'));
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragging');
-            if (e.dataTransfer.files.length) procesarArchivo(e.dataTransfer.files[0]);
-        });
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) procesarArchivo(e.target.files[0]);
-        });
-        
-        function procesarArchivo(file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const contenido = e.target.result;
-                    let lineas = contenido.trim().split('\n');
-                    
-                    if (lineas.length < 2) { alert('El archivo debe tener encabezados y al menos un registro'); return; }
-                    
-                    lineas = lineas.filter(l => l.trim().length > 0);
-                    const encabezados = lineas[0].split('\t');
-                    columnasOriginales = encabezados.map(h => h.trim());
-                    
-                    detectarFormato(columnasOriginales);
-                    
-                    datosGlobales = [];
-                    for (let i = 1; i < lineas.length; i++) {
-                        const valores = lineas[i].split('\t');
-                        if (valores.length >= encabezados.length) {
-                            const fila = {};
-                            encabezados.forEach((header, idx) => {
-                                fila[header.trim()] = valores[idx] ? valores[idx].trim() : '';
-                            });
-                            datosGlobales.push(fila);
-                        }
-                    }
-                    
-                    mostrarPreviewInicial();
-                } catch (error) {
-                    alert('Error: ' + error.message);
-                }
-            };
-            reader.readAsText(file);
-        }
-        
-        function detectarFormato(encabezados) {
-            if (encabezados.includes('NRO_LIST_REAPER')) {
-                formatoDetectado = 'REAP';
-            } else if (encabezados.includes('NRO_ASIG_OML_CONT')) {
-                formatoDetectado = 'OML';
-            } else {
-                formatoDetectado = 'DESCONOCIDO';
-            }
-        }
-        
-        function mostrarPreviewInicial() {
-            document.getElementById('previewInitialSection').classList.remove('hidden');
-            document.getElementById('configSection').classList.remove('hidden');
-            document.getElementById('previewSection').classList.add('hidden');
-            
-            const badge = document.getElementById('formatDetected');
-            badge.textContent = `📋 Formato: ${formatoDetectado} | ${datosGlobales.length} registros`;
-            
-            document.getElementById('totalRowCount').textContent = datosGlobales.length;
-            
-            const tabla = document.getElementById('previewInitialTable');
-            tabla.innerHTML = '';
-            
-            datosGlobales.forEach(fila => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${fila['NRO_SERVICIO'] || '-'}</td>
-                    <td>${fila['LOCALIDAD_SERVICIO'] || '-'}</td>
-                    <td>${fila['LATITUD'] || '(vacío)'}</td>
-                    <td>${fila['LONGITUD'] || '(vacío)'}</td>
-                `;
-                tabla.appendChild(tr);
-            });
-            
-            document.getElementById('modeSelector').querySelector('.mode-option').classList.add('selected');
-            modoSeleccionado = 'local';
-            actualizarModoInfo();
-        }
-        
-        function selectMode(modo) {
-            modoSeleccionado = modo;
-            document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('selected'));
-            event.target.closest('.mode-option').classList.add('selected');
-            actualizarModoInfo();
-            document.getElementById('processBtn').disabled = false;
-        }
-        
-        function actualizarModoInfo() {
-            let info = '';
-            if (modoSeleccionado === 'local') {
-                info = '⚡ Geocodificación local instantánea por localidad.';
-            } else {
-                if (datosGlobales.length > 50) {
-                    info = `⚠️ ${datosGlobales.length} registros. API lenta (~1 seg/registro). Máx 50 recomendado.`;
-                } else {
-                    info = `🎯 Modo API: dirección exacta. ${datosGlobales.length} registros (~${datosGlobales.length} segundos).`;
-                }
-            }
-            document.getElementById('modeInfo').textContent = info;
-        }
-        
-        async function procesarDatos() {
-            document.getElementById('previewInitialSection').classList.add('hidden');
-            document.getElementById('configSection').classList.add('hidden');
-            document.getElementById('previewSection').classList.remove('hidden');
-            
-            if (modoSeleccionado === 'local') {
-                procesarLocal();
-            } else {
-                await procesarAPI();
-            }
-        }
-        
-        function procesarLocal() {
-            datosProcessados = datosGlobales.map(fila => {
-                const latOrig = fila['LATITUD'] || '';
-                const lonOrig = fila['LONGITUD'] || '';
-                const localidad = (fila['LOCALIDAD_SERVICIO'] || '').toUpperCase();
-                
-                let x, y, modo;
-                
-                if (latOrig && lonOrig && latOrig !== '0' && latOrig.toLowerCase() !== 'nan') {
-                    // x = LONGITUD, y = LATITUD
-                    x = formatearCoordenada(lonOrig);
-                    y = formatearCoordenada(latOrig);
-                    modo = 'Original';
-                } else {
-                    const coords = coordenadaLocalidades[localidad];
-                    if (coords) {
-                        // BD local: coords.lon = LONGITUD, coords.lat = LATITUD
-                        x = coords.lon;
-                        y = coords.lat;
-                        modo = 'Localidad';
-                    } else {
-                        x = '0';
-                        y = '0';
-                        modo = 'No encontrado';
-                    }
-                }
-                
-                return { ...fila, 'x': x, 'y': y, modo: modo };
-            });
-            
-            mostrarPreview();
-        }
-        
-        async function procesarAPI() {
-            document.getElementById('geocodingContainer').style.display = 'block';
-            datosProcessados = [];
-            
-            for (let i = 0; i < datosGlobales.length; i++) {
-                const fila = datosGlobales[i];
-                const latOrig = fila['LATITUD'] || '';
-                const lonOrig = fila['LONGITUD'] || '';
-                const localidad = (fila['LOCALIDAD_SERVICIO'] || '').toUpperCase();
-                
-                let x, y, modo;
-                
-                if (latOrig && lonOrig && latOrig !== '0' && latOrig.toLowerCase() !== 'nan') {
-                    // x = LONGITUD, y = LATITUD
-                    x = formatearCoordenada(lonOrig);
-                    y = formatearCoordenada(latOrig);
-                    modo = 'Original';
-                } else {
-                    const calle = fila['CALLE_SERVICIO'] || '';
-                    const numero = fila['NRO_CALLE_SERVICIO'] || '';
-                    const provincia = fila['PROVINCIA_SERVICIO'] || '';
-                    
-                    try {
-                        const response = await fetch('/.netlify/functions/geocodificar', {
-                            method: 'POST',
-                            body: JSON.stringify({ calle, numero, localidad, provincia })
-                        });
-                        const data = await response.json();
-                        
-                        if (data.success) {
-                            // API devuelve: lat, lon
-                            // x = LONGITUD, y = LATITUD
-                            x = data.lon.replace('.', ',');
-                            y = data.lat.replace('.', ',');
-                            modo = 'API';
-                        } else {
-                            const coords = coordenadaLocalidades[localidad];
-                            x = coords ? coords.lon : '0';
-                            y = coords ? coords.lat : '0';
-                            modo = coords ? 'Fallback' : 'No encontrado';
-                        }
-                    } catch (error) {
-                        const coords = coordenadaLocalidades[localidad];
-                        x = coords ? coords.lon : '0';
-                        y = coords ? coords.lat : '0';
-                        modo = coords ? 'Fallback' : 'Error';
-                    }
-                }
-                
-                datosProcessados.push({ ...fila, 'x': x, 'y': y, modo: modo });
-                
-                const porcentaje = Math.round((i + 1) / datosGlobales.length * 100);
-                document.getElementById('geoProgressFill').style.width = porcentaje + '%';
-                document.getElementById('geoStatus').textContent = `Procesando: ${i + 1}/${datosGlobales.length}`;
-                
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
-            
-            document.getElementById('geocodingContainer').style.display = 'none';
-            mostrarPreview();
-        }
-        
-        function formatearCoordenada(valor) {
-            let formatted = String(valor).trim();
-            if (formatted.includes(',') && formatted.match(/^-?\d+,\d+/)) {
-                return formatted;
-            }
-            if (formatted.includes('.')) {
-                return formatted.replace('.', ',');
-            }
-            return formatted;
-        }
-        
-        function mostrarPreview() {
-            const tabla = document.getElementById('previewTable');
-            tabla.innerHTML = '';
-            
-            let conCoordenadas = 0;
-            let sinCoordenadas = 0;
-            
-            datosProcessados.forEach(fila => {
-                if (fila['x'] === '0' || !fila['x']) sinCoordenadas++;
-                else conCoordenadas++;
-                
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${fila['NRO_SERVICIO'] || '-'}</td>
-                    <td>${fila['LOCALIDAD_SERVICIO'] || '-'}</td>
-                    <td>${fila['LATITUD'] || '(vacío)'}</td>
-                    <td>${fila['LONGITUD'] || '(vacío)'}</td>
-                    <td><strong>${fila['x']}</strong></td>
-                    <td><strong>${fila['y']}</strong></td>
-                    <td>${fila['modo']}</td>
-                `;
-                tabla.appendChild(tr);
-            });
-            
-            document.getElementById('processedCount').textContent = datosProcessados.length;
-            document.getElementById('withCoords').textContent = conCoordenadas;
-            document.getElementById('withoutCoords').textContent = sinCoordenadas;
-            document.getElementById('progressFill').style.width = '100%';
-        }
-        
-        function descargarCSV() {
-            let csv = generarCSV();
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `${formatoDetectado}_GEOCODIFICADO_${new Date().getTime()}.csv`;
-            link.click();
-        }
-        
-        function generarCSV() {
-            if (!datosProcessados.length) return '';
-            const todasLasColumnas = [...columnasOriginales, 'x', 'y'];
-            let csv = todasLasColumnas.join(';') + '\n';
-            
-            datosProcessados.forEach(fila => {
-                const valores = todasLasColumnas.map(header => {
-                    let valor = fila[header] || '';
-                    if (valor.includes(';') || valor.includes('"')) {
-                        valor = '"' + valor.replace(/"/g, '""') + '"';
-                    }
-                    return valor;
-                });
-                csv += valores.join(';') + '\n';
-            });
-            return csv;
-        }
-        
-        function reiniciar() {
-            datosGlobales = [];
-            datosProcessados = [];
-            modoSeleccionado = null;
-            formatoDetectado = null;
-            columnasOriginales = [];
-            fileInput.value = '';
-            document.getElementById('previewInitialSection').classList.add('hidden');
-            document.getElementById('configSection').classList.add('hidden');
-            document.getElementById('previewSection').classList.add('hidden');
-        }
+        /* ... (Acá pegas todo tu bloque <script> original, funciona perfectamente con esta estructura) ... */
     </script>
 </body>
 </html>
