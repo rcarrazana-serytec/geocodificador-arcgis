@@ -375,6 +375,7 @@
                 } else {
                     const coords = coordenadaLocalidades[localidad];
                     if (coords) {
+                        // BD local ya tiene formato correcto con coma, NO FORMATEA
                         x = coords.lat;
                         y = coords.lon;
                         modo = 'Localidad';
@@ -462,15 +463,23 @@
         
         function formatearCoordenada(valor) {
             let formatted = String(valor).trim();
-            // Si tiene punto decimal (de API), convertir a coma
+            
+            // Si ya tiene formato correcto con coma, devolverlo tal cual
+            if (formatted.includes(',') && formatted.match(/^-?\d+,\d+/)) {
+                return formatted;
+            }
+            
+            // Si tiene punto decimal (de API o archivos), convertir a coma
             if (formatted.includes('.')) {
                 return formatted.replace('.', ',');
             }
-            // Si no tiene decimales (de BD local), agregar coma después de 3 caracteres
+            
+            // Si son números sin decimales (antiguo formato), agregar coma después de 3 caracteres
             formatted = formatted.replace(/\./g, '');
             if (formatted.length > 3) {
                 return formatted.substring(0, 3) + ',' + formatted.substring(3);
             }
+            
             return formatted;
         }
         
