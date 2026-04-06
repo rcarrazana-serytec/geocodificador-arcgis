@@ -1,0 +1,16 @@
+{
+  "name": "geocodificador-arcgis",
+  "version": "1.0.0",
+  "description": "Geocodificador híbrido para Salta y Jujuy",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Build completado'",
+    "dev": "netlify dev"
+  },
+  "keywords": ["arcgis", "geocodificacion", "salta", "jujuy"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "netlify-cli": "^15.0.0"
+  }
+}
