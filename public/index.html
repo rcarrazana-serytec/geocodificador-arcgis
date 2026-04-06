@@ -491,7 +491,16 @@
 
           <div class="st-card__footer">
             <button class="st-btn st-btn--ghost" onclick="reiniciar()">Cargar otro</button>
-            <button class="st-btn st-btn--primary" onclick="descargarCSV()">⬇️ Descargar CSV</button>
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <label style="font-size: var(--st-text-sm); font-weight: 600; color: var(--st-gris-oscuro);">
+                Formato decimal:
+                <select id="formatoDecimal" style="margin-left: 8px; padding: 6px 12px; border: 1px solid var(--st-gris-claro); border-radius: var(--st-radius-md); font-size: var(--st-text-sm);">
+                  <option value="coma">Coma (,)</option>
+                  <option value="punto">Punto (.)</option>
+                </select>
+              </label>
+              <button class="st-btn st-btn--primary" onclick="descargarCSV()">⬇️ Descargar CSV</button>
+            </div>
           </div>
         </div>
       </section>
@@ -811,15 +820,17 @@
     }
 
     function descargarCSV() {
-      let csv = generarCSV();
+      const formato = document.getElementById('formatoDecimal').value;
+      let csv = generarCSV(formato);
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `${formatoDetectado}_GEOCODIFICADO_${new Date().getTime()}.csv`;
+      const sufijo = formato === 'coma' ? 'COMA' : 'PUNTO';
+      link.download = `${formatoDetectado}_GEOCODIFICADO_${sufijo}_${new Date().getTime()}.csv`;
       link.click();
     }
 
-    function generarCSV() {
+    function generarCSV(formato = 'coma') {
       if (!datosProcessados.length) return '';
       const todasLasColumnas = [...columnasOriginales, 'x', 'y'];
       let csv = todasLasColumnas.join(';') + '\n';
@@ -827,6 +838,12 @@
       datosProcessados.forEach(fila => {
         const valores = todasLasColumnas.map(header => {
           let valor = fila[header] || '';
+          
+          // Convertir formato decimal si es necesario
+          if (formato === 'punto' && (header === 'x' || header === 'y')) {
+            valor = valor.replace(',', '.');
+          }
+          
           if (valor.includes(';') || valor.includes('"')) {
             valor = '"' + valor.replace(/"/g, '""') + '"';
           }
