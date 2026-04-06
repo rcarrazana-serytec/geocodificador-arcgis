@@ -461,7 +461,13 @@
         }
         
         function formatearCoordenada(valor) {
-            let formatted = String(valor).trim().replace(/\./g, '');
+            let formatted = String(valor).trim();
+            // Si tiene punto decimal (de API), convertir a coma
+            if (formatted.includes('.')) {
+                return formatted.replace('.', ',');
+            }
+            // Si no tiene decimales (de BD local), agregar coma después de 3 caracteres
+            formatted = formatted.replace(/\./g, '');
             if (formatted.length > 3) {
                 return formatted.substring(0, 3) + ',' + formatted.substring(3);
             }
@@ -475,7 +481,7 @@
             let conCoordenadas = 0;
             let sinCoordenadas = 0;
             
-            datosProcessados.slice(0, 10).forEach(fila => {
+            datosProcessados.forEach(fila => {
                 if (fila['x'] === '0' || !fila['x']) sinCoordenadas++;
                 else conCoordenadas++;
                 
