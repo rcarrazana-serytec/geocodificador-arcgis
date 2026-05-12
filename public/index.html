@@ -523,7 +523,7 @@
       'LAS LAJITAS': {lat: '-25,201389', lon: '-63,930556'},
       'EL BORDO': {lat: '-25,411667', lon: '-65,104167'},
       'EL QUEBRACHAL': {lat: '-25,178', lon: '-64,368'},
-      'MOSCONI': {lat: '-22,596205', lon: '-63,811001'},
+      'MOSCONI': {lat: '-22,393889', lon: '-63,618056'},
       'SALVADOR MAZZA': {lat: '-22,100833', lon: '-63,711389'},
       'PERICO': {lat: '-24,016389', lon: '-65,511389'},
       'SANTO DOMINGO': {lat: '-24,163056', lon: '-65,358889'},
@@ -560,6 +560,28 @@
       if (e.target.files.length) procesarArchivo(e.target.files[0]);
     });
 
+    function detectarSeparador(primerLinea) {
+      // Contar ocurrencias de cada separador potencial
+      const contadores = {
+        '\t': (primerLinea.match(/\t/g) || []).length,
+        ',': (primerLinea.match(/,/g) || []).length,
+        ';': (primerLinea.match(/;/g) || []).length
+      };
+
+      // El separador más probable es el que más aparece
+      let separadorMasProbable = '\t'; // Default
+      let maxOcurrencias = 0;
+
+      for (const [sep, count] of Object.entries(contadores)) {
+        if (count > maxOcurrencias) {
+          maxOcurrencias = count;
+          separadorMasProbable = sep;
+        }
+      }
+
+      return separadorMasProbable;
+    }
+
     function procesarArchivo(file) {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -570,14 +592,18 @@
           if (lineas.length < 2) { alert('El archivo debe tener encabezados y al menos un registro'); return; }
           
           lineas = lineas.filter(l => l.trim().length > 0);
-          const encabezados = lineas[0].split('\t');
+          
+          // DETECTAR SEPARADOR automáticamente
+          const separador = detectarSeparador(lineas[0]);
+          
+          const encabezados = lineas[0].split(separador);
           columnasOriginales = encabezados.map(h => h.trim());
           
           detectarFormato(columnasOriginales);
           
           datosGlobales = [];
           for (let i = 1; i < lineas.length; i++) {
-            const valores = lineas[i].split('\t');
+            const valores = lineas[i].split(separador);
             if (valores.length >= encabezados.length) {
               const fila = {};
               encabezados.forEach((header, idx) => {
