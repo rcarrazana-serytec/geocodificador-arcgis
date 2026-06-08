@@ -504,45 +504,47 @@
     let formatoDetectado = null;
     let columnasOriginales = [];
     
+    // ✅ COORDENADAS CON PUNTO DECIMAL (no COMA) para evitar conflictos en CSV
     const coordenadaLocalidades = {
-      'SALTA': {lat: '-24,789322', lon: '-65,410351'},
-      'PICHANAL': {lat: '-24,068', lon: '-65,133'},
-      'SAN SALVADOR DE JUJUY': {lat: '-24,182787', lon: '-65,314820'},
-      'AGUARAY': {lat: '-24,073056', lon: '-63,806389'},
-      'HIPOLITO IRIGOYEN': {lat: '-24,195833', lon: '-63,881667'},
-      'METAN': {lat: '-25,488515', lon: '-64,967940'},
-      'TARTAGAL': {lat: '-22,516787', lon: '-63,808606'},
-      'PALPALA': {lat: '-24,355278', lon: '-65,404722'},
-      'LIBERTADOR GENERAL SAN MARTIN': {lat: '-23,815217', lon: '-64,792801'},
-      'SAN PEDRO': {lat: '-24,231558', lon: '-64,867835'},
-      'CERRILLOS': {lat: '-25,294167', lon: '-65,491667'},
-      'ORAN': {lat: '-23,136108', lon: '-64,322985'},
-      'CAMPO SANTO': {lat: '-25,345', lon: '-65,258'},
-      'FRAILE PINTADO': {lat: '-23,928889', lon: '-65,400556'},
-      'GENERAL GUEMES': {lat: '-25,198333', lon: '-65,339444'},
-      'LAS LAJITAS': {lat: '-25,201389', lon: '-63,930556'},
-      'EL BORDO': {lat: '-25,411667', lon: '-65,104167'},
-      'EL QUEBRACHAL': {lat: '-25,178', lon: '-64,368'},
-      'MOSCONI': {lat: '-22,393889', lon: '-63,618056'},
-      'SALVADOR MAZZA': {lat: '-22,100833', lon: '-63,711389'},
-      'PERICO': {lat: '-24,016389', lon: '-65,511389'},
-      'SANTO DOMINGO': {lat: '-24,163056', lon: '-65,358889'},
-      'LA MENDIETA': {lat: '-23,716667', lon: '-65,466667'},
-      'MONTERRICO': {lat: '-23,6', lon: '-65,65'},
-      'APOLINARIO SARAVIA': {lat: '-22,871944', lon: '-63,951667'},
-      'J. V. GONZALEZ': {lat: '-23,015833', lon: '-63,746667'},
-      'GRAL. PIZARRO': {lat: '-22,538333', lon: '-63,863056'},
-      'EL CARMEN': {lat: '-23,616111', lon: '-65,566667'},
-      'EMBARCACION': {lat: '-23,219167', lon: '-64,176111'},
-      'HUMAHUACA': {lat: '-23,203529', lon: '-65,349593'},
-      'TILCARA': {lat: '-23,574444', lon: '-65,405'},
-      'YALA': {lat: '-24,137222', lon: '-65,329722'},
-      'LOZANO': {lat: '-23,815278', lon: '-65,325833'},
-      'MAIMARA': {lat: '-23,639722', lon: '-65,406389'},
-      'ROSARIO DE LA FRONTERA': {lat: '-25,837222', lon: '-64,953889'},
-      'ROSARIO DE LERMA': {lat: '-26,182222', lon: '-64,850833'},
-      'SAN LUIS': {lat: '-25,205556', lon: '-65,497778'},
-      'LA QUIACA': {lat: '-23,736389', lon: '-65,596667'}
+      'SALTA': {lat: '-24.789322', lon: '-65.410351'},
+      'PICHANAL': {lat: '-24.068', lon: '-65.133'},
+      'SAN SALVADOR DE JUJUY': {lat: '-24.182787', lon: '-65.314820'},
+      'AGUARAY': {lat: '-24.073056', lon: '-63.806389'},
+      'HIPOLITO IRIGOYEN': {lat: '-24.195833', lon: '-63.881667'},
+      'METAN': {lat: '-25.488515', lon: '-64.967940'},
+      'TARTAGAL': {lat: '-22.516787', lon: '-63.808606'},
+      'PALPALA': {lat: '-24.355278', lon: '-65.404722'},
+      'LIBERTADOR GENERAL SAN MARTIN': {lat: '-23.815217', lon: '-64.792801'},
+      'SAN PEDRO': {lat: '-24.231558', lon: '-64.867835'},
+      'CERRILLOS': {lat: '-25.294167', lon: '-65.491667'},
+      'ORAN': {lat: '-23.136108', lon: '-64.322985'},
+      'CAMPO SANTO': {lat: '-25.345', lon: '-65.258'},
+      'FRAILE PINTADO': {lat: '-23.928889', lon: '-65.400556'},
+      'GENERAL GUEMES': {lat: '-25.198333', lon: '-65.339444'},
+      'LAS LAJITAS': {lat: '-25.201389', lon: '-63.930556'},
+      'EL BORDO': {lat: '-25.411667', lon: '-65.104167'},
+      'EL QUEBRACHAL': {lat: '-25.178', lon: '-64.368'},
+      'MOSCONI': {lat: '-22.393889', lon: '-63.618056'},
+      'SALVADOR MAZZA': {lat: '-22.100833', lon: '-63.711389'},
+      'PERICO': {lat: '-24.016389', lon: '-65.511389'},
+      'SANTO DOMINGO': {lat: '-24.163056', lon: '-65.358889'},
+      'LA MENDIETA': {lat: '-23.716667', lon: '-65.466667'},
+      'MONTERRICO': {lat: '-23.6', lon: '-65.65'},
+      'APOLINARIO SARAVIA': {lat: '-22.871944', lon: '-63.951667'},
+      'J. V. GONZALEZ': {lat: '-23.015833', lon: '-63.746667'},
+      'GRAL. PIZARRO': {lat: '-22.538333', lon: '-63.863056'},
+      'EL CARMEN': {lat: '-23.616111', lon: '-65.566667'},
+      'EMBARCACION': {lat: '-23.219167', lon: '-64.176111'},
+      'HUMAHUACA': {lat: '-23.203529', lon: '-65.349593'},
+      'TILCARA': {lat: '-23.574444', lon: '-65.405'},
+      'YALA': {lat: '-24.137222', lon: '-65.329722'},
+      'LOZANO': {lat: '-23.815278', lon: '-65.325833'},
+      'MAIMARA': {lat: '-23.639722', lon: '-65.406389'},
+      'ROSARIO DE LA FRONTERA': {lat: '-25.837222', lon: '-64.953889'},
+      'ROSARIO DE LERMA': {lat: '-26.182222', lon: '-64.850833'},
+      'SAN LUIS': {lat: '-25.205556', lon: '-65.497778'},
+      'LA QUIACA': {lat: '-23.736389', lon: '-65.596667'},
+      'VILLA JARDIN DE REYES': {lat: '-24.355', lon: '-65.465'}
     };
 
     const uploadArea = document.getElementById('uploadArea');
@@ -607,7 +609,17 @@
             if (valores.length >= encabezados.length) {
               const fila = {};
               encabezados.forEach((header, idx) => {
-                fila[header.trim()] = valores[idx] ? valores[idx].trim() : '';
+                let valor = valores[idx] ? valores[idx].trim() : '';
+                
+                // ✅ LIMPIEZA AGRESIVA: Si es LATITUD o LONGITUD, eliminar saltos de línea/tabs/espacios
+                if (header.trim() === 'LATITUD' || header.trim() === 'LONGITUD') {
+                  valor = valor
+                    .replace(/[\r\n\t]+/g, '')    // Eliminar saltos de línea y tabs
+                    .replace(/\s+/g, '')           // Eliminar espacios
+                    .trim();
+                }
+                
+                fila[header.trim()] = valor;
               });
               datosGlobales.push(fila);
             }
@@ -714,8 +726,8 @@
             y = coords.lat;
             modo = 'Localidad';
           } else {
-            x = '0';
-            y = '0';
+            x = '';
+            y = '';
             modo = 'No encontrado';
           }
         }
@@ -755,19 +767,19 @@
             const data = await response.json();
             
             if (data.success) {
-              x = data.lon.replace('.', ',');
-              y = data.lat.replace('.', ',');
+              x = data.lon;
+              y = data.lat;
               modo = 'API';
             } else {
               const coords = coordenadaLocalidades[localidad];
-              x = coords ? coords.lon : '0';
-              y = coords ? coords.lat : '0';
+              x = coords ? coords.lon : '';
+              y = coords ? coords.lat : '';
               modo = coords ? 'Fallback' : 'No encontrado';
             }
           } catch (error) {
             const coords = coordenadaLocalidades[localidad];
-            x = coords ? coords.lon : '0';
-            y = coords ? coords.lat : '0';
+            x = coords ? coords.lon : '';
+            y = coords ? coords.lat : '';
             modo = coords ? 'Fallback' : 'Error';
           }
         }
@@ -787,9 +799,11 @@
 
     function formatearCoordenada(valor) {
       let formatted = String(valor).trim();
+      // Si tiene coma y parece un número, devolverlo como está
       if (formatted.includes(',') && formatted.match(/^-?\d+,\d+/)) {
         return formatted;
       }
+      // Si tiene punto, convertir a coma
       if (formatted.includes('.')) {
         return formatted.replace('.', ',');
       }
@@ -804,7 +818,7 @@
       let sinCoordenadas = 0;
       
       datosProcessados.forEach(fila => {
-        if (fila['X'] === '0' || !fila['X']) sinCoordenadas++;
+        if (fila['X'] === '' || !fila['X'] || fila['X'] === '0') sinCoordenadas++;
         else conCoordenadas++;
         
         const tr = document.createElement('tr');
@@ -834,7 +848,9 @@
       link.href = URL.createObjectURL(blob);
       const sufijo = formato === 'coma' ? 'COMA' : 'PUNTO';
       link.download = `${formatoDetectado}_GEOCODIFICADO_${sufijo}_${new Date().getTime()}.csv`;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     }
 
     function generarCSV(formato = 'coma') {
@@ -846,14 +862,26 @@
         const valores = todasLasColumnas.map(header => {
           let valor = fila[header] || '';
           
-          // Convertir formato decimal si es necesario
-          if (formato === 'punto' && (header === 'X' || header === 'Y')) {
-            valor = valor.replace(',', '.');
+          // ✅ LIMPIEZA AGRESIVA de caracteres problemáticos en TODOS los campos
+          valor = valor
+            .replace(/[\r\n\t]+/g, ' ')    // Saltos de línea/tabs → espacio
+            .replace(/\s+/g, ' ')          // Espacios múltiples → uno
+            .trim();
+          
+          // Convertir formato decimal para X e Y
+          if (header === 'X' || header === 'Y') {
+            if (formato === 'coma') {
+              valor = valor.replace('.', ',');  // Punto a coma
+            } else {
+              valor = valor.replace(',', '.');  // Coma a punto
+            }
           }
           
+          // Entrecomillar si tiene ; o "
           if (valor.includes(';') || valor.includes('"')) {
             valor = '"' + valor.replace(/"/g, '""') + '"';
           }
+          
           return valor;
         });
         csv += valores.join(';') + '\n';
