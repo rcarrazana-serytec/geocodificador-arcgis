@@ -346,9 +346,9 @@
               <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
             </svg>
           </div>
-          <div class="st-upload__title">Arrastrá tus archivos aquí</div>
-          <div class="st-upload__sub">o hacé click para seleccionar · Múltiples archivos REAP (.txt) u OML (.csv)</div>
-          <input type="file" id="fileInput" accept=".txt,.csv" multiple style="display: none;" />
+          <div class="st-upload__title">Arrastrá tu archivo aquí</div>
+          <div class="st-upload__sub">o hacé click para seleccionar · REAP (.txt) u OML (.csv)</div>
+          <input type="file" id="fileInput" accept=".txt,.csv" style="display: none;" />
         </div>
       </section>
 
@@ -472,88 +472,19 @@
 
           <div class="st-card__footer">
             <button class="st-btn st-btn--ghost" onclick="reiniciar()">Cargar otro</button>
-            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; gap: 12px; align-items: center;">
               <label style="font-size: var(--st-text-sm); font-weight: 600; color: var(--st-gris-oscuro);">
                 Formato decimal:
-                <select id="formatoDecimal" style="margin-left: 8px; padding: 6px 12px; border: 1px solid var(--st-gris-claro); border-radius: var(--st-radius-md); font-size: var(--st-text-sm);" onchange="actualizarVistaPrevia()">
+                <select id="formatoDecimal" style="margin-left: 8px; padding: 6px 12px; border: 1px solid var(--st-gris-claro); border-radius: var(--st-radius-md); font-size: var(--st-text-sm);">
                   <option value="coma">Coma (,)</option>
                   <option value="punto">Punto (.)</option>
                 </select>
               </label>
-              <button class="st-btn st-btn--primary" onclick="mostrarPreviewCSV()">👁️ Previsualizar CSV</button>
               <button class="st-btn st-btn--primary" onclick="descargarCSV()">⬇️ Descargar CSV</button>
             </div>
           </div>
         </div>
       </section>
-
-      <!-- MODAL PREVISUALIZACIÓN CSV -->
-      <div id="modalPreview" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; padding: 20px; overflow-y: auto;">
-        <div style="background: var(--st-blanco); border-radius: var(--st-radius-lg); max-width: 1000px; margin: 40px auto; padding: 0; box-shadow: var(--st-sombra-lg); display: flex; flex-direction: column; max-height: 80vh;">
-          
-          <!-- Header Modal -->
-          <div style="padding: var(--st-space-lg); border-bottom: 1px solid var(--st-gris-claro); display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="margin: 0; font-size: var(--st-text-xl);">Previsualización CSV</h2>
-            <button class="st-btn st-btn--ghost" onclick="document.getElementById('modalPreview').style.display = 'none'" style="padding: 4px 8px; font-size: 20px;">✕</button>
-          </div>
-          
-          <!-- Info CSV -->
-          <div style="padding: var(--st-space-lg); background: var(--st-gris-fondo); border-bottom: 1px solid var(--st-gris-claro); display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
-            <div>
-              <div class="st-label">Columnas</div>
-              <div style="font-size: 20px; font-weight: 700;" id="previewColCount">-</div>
-            </div>
-            <div>
-              <div class="st-label">Filas (datos)</div>
-              <div style="font-size: 20px; font-weight: 700;" id="previewRowCount">-</div>
-            </div>
-            <div>
-              <div class="st-label">Separador</div>
-              <div style="font-size: 20px; font-weight: 700;" id="previewSeparador">;</div>
-            </div>
-            <div>
-              <div class="st-label">Formato XY</div>
-              <div style="font-size: 20px; font-weight: 700;" id="previewFormato">-</div>
-            </div>
-          </div>
-          
-          <!-- SELECTOR DE TRIMMING -->
-          <div style="padding: var(--st-space-lg); background: var(--st-amarillo-tenue); border-bottom: 1px solid var(--st-amarillo-borde); border-top: 1px solid var(--st-amarillo-borde);">
-            <div class="st-label st-label--gold">✂️ Trimming de Columnas</div>
-            <p style="margin: 8px 0 16px 0; color: var(--st-gris-oscuro); font-size: var(--st-text-sm);">
-              Selecciona la última columna válida. Todo lo que venga después será eliminado del CSV.
-            </p>
-            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-              <select id="ultimaColumnaValida" style="padding: 8px 12px; border: 1px solid var(--st-gris-claro); border-radius: var(--st-radius-md); font-size: var(--st-text-sm); min-width: 250px;">
-                <!-- Se llena con JavaScript -->
-              </select>
-              <button class="st-btn st-btn--sm" onclick="aplicarTrimmingEnPreview()">Aplicar</button>
-              <button class="st-btn st-btn--ghost st-btn--sm" onclick="resetearTrimmingEnPreview()">Resetear</button>
-            </div>
-            <div id="trimmingInfo" style="margin-top: 12px; padding: 8px; background: var(--st-blanco); border-radius: var(--st-radius-md); font-size: var(--st-text-xs); color: var(--st-gris-medio);">
-              Cargando...
-            </div>
-          </div>
-          
-          <!-- Tabla Previsualización -->
-          <div style="flex: 1; overflow: auto; padding: var(--st-space-lg);">
-            <div class="st-table-wrapper" style="max-height: none;">
-              <table class="st-table" style="margin: 0;">
-                <thead>
-                  <tr id="previewHeader"></tr>
-                </thead>
-                <tbody id="previewBody"></tbody>
-              </table>
-            </div>
-          </div>
-          
-          <!-- Footer Modal -->
-          <div style="padding: var(--st-space-lg); border-top: 1px solid var(--st-gris-claro); display: flex; gap: 12px; justify-content: flex-end;">
-            <button class="st-btn st-btn--ghost" onclick="document.getElementById('modalPreview').style.display = 'none'">Cerrar</button>
-            <button class="st-btn st-btn--primary" onclick="descargarCSV(); document.getElementById('modalPreview').style.display = 'none'">⬇️ Descargar</button>
-          </div>
-        </div>
-      </div>
 
     </div>
   </main>
@@ -569,11 +500,9 @@
   <script>
     let datosGlobales = [];
     let datosProcessados = [];
-    let archivoscargados = [];  // ✅ Para múltiples archivos
     let modoSeleccionado = null;
     let formatoDetectado = null;
     let columnasOriginales = [];
-    let columnasTrimmingIndex = -1;  // -1 = sin trimming (usar todas las columnas)
     
     // ✅ COORDENADAS CON PUNTO DECIMAL (no COMA) para evitar conflictos en CSV
     const coordenadaLocalidades = {
@@ -627,10 +556,10 @@
     uploadArea.addEventListener('drop', (e) => {
       e.preventDefault();
       uploadArea.style.borderColor = '';
-      if (e.dataTransfer.files.length) procesarMultiplesArchivos(e.dataTransfer.files);
+      if (e.dataTransfer.files.length) procesarArchivo(e.dataTransfer.files[0]);
     });
     fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length) procesarMultiplesArchivos(e.target.files);
+      if (e.target.files.length) procesarArchivo(e.target.files[0]);
     });
 
     function detectarSeparador(primerLinea) {
@@ -655,128 +584,16 @@
       return separadorMasProbable;
     }
 
-    function procesarMultiplesArchivos(files) {
-      // ✅ Procesar todos los archivos y consolidar datos
-      datosGlobales = [];
-      archivoscargados = [];
-      let processados = 0;
-      let errores = [];
-      
-      for (let file of files) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            let contenido = e.target.result;
-            contenido = contenido
-              .replace(/\uFEFF/g, '')
-              .replace(/\r\n/g, '\n')
-              .replace(/\r/g, '\n')
-              .trim();
-            
-            let lineas = contenido.split('\n').filter(l => l.trim().length > 0);
-            
-            if (lineas.length < 2) {
-              errores.push(`${file.name}: sin datos`);
-              processados++;
-              if (processados === files.length) finalizarCargaMultiple(errores);
-              return;
-            }
-            
-            const separador = detectarSeparador(lineas[0]);
-            const encabezados = lineas[0].split(separador);
-            
-            if (processados === 0) {
-              columnasOriginales = encabezados.map(h => h.trim());
-              detectarFormato(columnasOriginales);
-            }
-            
-            for (let i = 1; i < lineas.length; i++) {
-              const valores = lineas[i].split(separador);
-              if (valores.length > 0) {
-                const fila = {};
-                encabezados.forEach((header, idx) => {
-                  const headerLimpio = header.trim();
-                  let valor = valores[idx] ? valores[idx].trim() : '';
-                  
-                  if (headerLimpio === 'LATITUD' || headerLimpio === 'LONGITUD') {
-                    valor = valor.replace(/[\r\n\t]/g, '').trim();
-                  }
-                  
-                  fila[headerLimpio] = valor;
-                });
-                
-                if (fila['NRO_SERVICIO'] || fila['NRO_LIST_REAPER']) {
-                  datosGlobales.push(fila);
-                }
-              }
-            }
-            
-            archivoscargados.push({
-              nombre: file.name,
-              registros: Math.max(0, lineas.length - 1)
-            });
-            
-            processados++;
-            if (processados === files.length) finalizarCargaMultiple(errores);
-            
-          } catch (error) {
-            errores.push(`${file.name}: ${error.message}`);
-            processados++;
-            if (processados === files.length) finalizarCargaMultiple(errores);
-          }
-        };
-        reader.readAsText(file, 'utf-8');
-      }
-    }
-    
-    function finalizarCargaMultiple(errores) {
-      if (datosGlobales.length === 0) {
-        alert('No se pudieron cargar datos válidos de ningún archivo');
-        return;
-      }
-      
-      mostrarPreviewInicial();
-      
-      // Mostrar info de archivos cargados
-      const infoArchivos = document.getElementById('formatDetected');
-      let textoInfo = `📋 Formato: ${formatoDetectado} | ${archivoscargados.length} archivo(s) | ${datosGlobales.length} registros totales`;
-      
-      if (archivoscargados.length > 1) {
-        textoInfo += '<br><small>✅ Archivos: ' + archivoscargados.map(a => `${a.nombre} (${a.registros} regs)`).join(' + ') + '</small>';
-      }
-      
-      if (errores.length > 0) {
-        textoInfo += '<br><small>⚠️ ' + errores.join(' | ') + '</small>';
-      }
-      
-      infoArchivos.innerHTML = textoInfo;
-    }
+    function procesarArchivo(file) {
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
-          let contenido = e.target.result;
+          const contenido = e.target.result;
+          let lineas = contenido.trim().split('\n');
           
-          // ✅ LIMPIEZA MÍNIMA: Solo eliminar BOM y normalizar saltos de línea
-          contenido = contenido
-            .replace(/\uFEFF/g, '')             // Eliminar BOM
-            .replace(/\r\n/g, '\n')             // CRLF → LF
-            .replace(/\r/g, '\n')               // CR → LF
-            .trim();
+          if (lineas.length < 2) { alert('El archivo debe tener encabezados y al menos un registro'); return; }
           
-          let lineas = contenido.split('\n');
-          
-          if (lineas.length < 2) { 
-            alert('El archivo debe tener encabezados y al menos un registro'); 
-            return; 
-          }
-          
-          // Limpiar líneas vacías
           lineas = lineas.filter(l => l.trim().length > 0);
-          
-          if (lineas.length < 2) {
-            alert('El archivo no tiene datos válidos');
-            return;
-          }
           
           // DETECTAR SEPARADOR automáticamente
           const separador = detectarSeparador(lineas[0]);
@@ -788,45 +605,32 @@
           
           datosGlobales = [];
           for (let i = 1; i < lineas.length; i++) {
-            const lineaTrimmed = lineas[i].trim();
-            if (!lineaTrimmed) continue;
-            
-            const valores = lineaTrimmed.split(separador);
-            if (valores.length > 0) {
+            const valores = lineas[i].split(separador);
+            if (valores.length >= encabezados.length) {
               const fila = {};
               encabezados.forEach((header, idx) => {
-                const headerLimpio = header.trim();
                 let valor = valores[idx] ? valores[idx].trim() : '';
                 
-                // Solo limpiar LAT/LON de saltos de línea (en caso de que los tengan)
-                if (headerLimpio === 'LATITUD' || headerLimpio === 'LONGITUD') {
-                  valor = valor.replace(/[\r\n]/g, '').trim();
+                // ✅ LIMPIEZA AGRESIVA: Si es LATITUD o LONGITUD, eliminar saltos de línea/tabs/espacios
+                if (header.trim() === 'LATITUD' || header.trim() === 'LONGITUD') {
+                  valor = valor
+                    .replace(/[\r\n\t]+/g, '')    // Eliminar saltos de línea y tabs
+                    .replace(/\s+/g, '')           // Eliminar espacios
+                    .trim();
                 }
                 
-                fila[headerLimpio] = valor;
+                fila[header.trim()] = valor;
               });
-              
-              // Solo agregar si tiene NRO_SERVICIO o algún identificador
-              if (fila['NRO_SERVICIO'] || fila['NRO_LIST_REAPER']) {
-                datosGlobales.push(fila);
-              }
+              datosGlobales.push(fila);
             }
           }
           
-          if (datosGlobales.length === 0) {
-            alert(`No se encontraron registros válidos. Se detectaron ${lineas.length - 1} líneas.`);
-            return;
-          }
-          
-          console.log(`✅ Cargados ${datosGlobales.length} registros`);
           mostrarPreviewInicial();
-          
         } catch (error) {
-          alert('Error procesando archivo: ' + error.message);
-          console.error(error);
+          alert('Error: ' + error.message);
         }
       };
-      reader.readAsText(file, 'utf-8');
+      reader.readAsText(file);
     }
 
     function detectarFormato(encabezados) {
@@ -907,21 +711,19 @@
       datosProcessados = datosGlobales.map(fila => {
         const latOrig = fila['LATITUD'] || '';
         const lonOrig = fila['LONGITUD'] || '';
-        const localidad = (fila['LOCALIDAD_SERVICIO'] || '').toUpperCase().trim();
+        const localidad = (fila['LOCALIDAD_SERVICIO'] || '').toUpperCase();
         
         let x, y, modo;
         
-        // Si tiene coordenadas válidas en el archivo original
         if (latOrig && lonOrig && latOrig !== '0' && latOrig.toLowerCase() !== 'nan') {
           x = formatearCoordenada(lonOrig);
           y = formatearCoordenada(latOrig);
           modo = 'Original';
         } else {
-          // Buscar en BD local por localidad
           const coords = coordenadaLocalidades[localidad];
           if (coords) {
-            x = coords.lon;   // Ya tiene PUNTO
-            y = coords.lat;   // Ya tiene PUNTO
+            x = coords.lon;
+            y = coords.lat;
             modo = 'Localidad';
           } else {
             x = '';
@@ -930,20 +732,7 @@
           }
         }
         
-        // ✅ Crear objeto LIMPIO: copiar SOLO columnas válidas + X, Y
-        const resultado = {};
-        
-        // Copiar solo las columnas originales que existen
-        columnasOriginales.forEach(col => {
-          resultado[col] = fila[col] || '';
-        });
-        
-        // Agregar coordenadas (con PUNTO internamente)
-        resultado['X'] = x;
-        resultado['Y'] = y;
-        resultado['modo'] = modo;
-        
-        return resultado;
+        return { ...fila, 'X': x, 'Y': y, modo: modo };
       });
       
       mostrarPreview();
@@ -995,16 +784,7 @@
           }
         }
         
-        // ✅ Crear objeto LIMPIO: copiar SOLO columnas válidas + X, Y
-        const resultado = {};
-        columnasOriginales.forEach(col => {
-          resultado[col] = fila[col] || '';
-        });
-        resultado['X'] = x;
-        resultado['Y'] = y;
-        resultado['modo'] = modo;
-        
-        datosProcessados.push(resultado);
+        datosProcessados.push({ ...fila, 'X': x, 'Y': y, modo: modo });
         
         const porcentaje = Math.round((i + 1) / datosGlobales.length * 100);
         document.getElementById('geoProgressFill').style.width = porcentaje + '%';
@@ -1018,15 +798,15 @@
     }
 
     function formatearCoordenada(valor) {
-      // ✅ Convertir a string y limpiar saltos de línea
-      let formatted = String(valor).trim().replace(/[\r\n\t]/g, '');
-      
-      // Normalizar: SIEMPRE convertir COMA a PUNTO (formato interno)
-      if (formatted.includes(',')) {
-        formatted = formatted.replace(',', '.');
+      let formatted = String(valor).trim();
+      // Si tiene coma y parece un número, devolverlo como está
+      if (formatted.includes(',') && formatted.match(/^-?\d+,\d+/)) {
+        return formatted;
       }
-      
-      // Devolver con PUNTO (se convierte a COMA/PUNTO solo al exportar)
+      // Si tiene punto, convertir a coma
+      if (formatted.includes('.')) {
+        return formatted.replace('.', ',');
+      }
       return formatted;
     }
 
@@ -1060,106 +840,6 @@
       document.getElementById('progressFill').style.width = '100%';
     }
 
-    function mostrarPreviewCSV() {
-      const formato = document.getElementById('formatoDecimal').value;
-      const csv = generarCSV(formato);
-      const lineas = csv.trim().split('\n');
-      
-      if (lineas.length < 2) {
-        alert('No hay datos para previsualizar');
-        return;
-      }
-      
-      // Parsear encabezados
-      const encabezados = lineas[0].split(';');
-      const numColumnas = encabezados.length;
-      const numFilas = lineas.length - 1;
-      
-      // Mostrar info
-      document.getElementById('previewColCount').textContent = numColumnas;
-      document.getElementById('previewRowCount').textContent = numFilas;
-      document.getElementById('previewFormato').textContent = formato === 'coma' ? 'Coma (,)' : 'Punto (.)';
-      
-      // ✅ LLENAR SELECTOR DE TRIMMING
-      const selectColumnas = document.getElementById('ultimaColumnaValida');
-      selectColumnas.innerHTML = '';
-      
-      // Solo mostrar columnas originales (sin X e Y)
-      const colsOriginales = encabezados.slice(0, -2); // Remover X e Y del final
-      colsOriginales.forEach((col, idx) => {
-        const option = document.createElement('option');
-        option.value = idx;
-        option.textContent = `${idx + 1}. ${col.trim()}`;
-        selectColumnas.appendChild(option);
-      });
-      selectColumnas.value = colsOriginales.length - 1; // Seleccionar última por defecto
-      
-      // Actualizar info de trimming
-      if (columnasTrimmingIndex >= 0) {
-        const colsEliminadas = columnasOriginales.length - (columnasTrimmingIndex + 1);
-        document.getElementById('trimmingInfo').innerHTML = `
-          ✂️ <strong>${colsEliminadas} columnas eliminadas.</strong> 
-          Usando: ${columnasTrimmingIndex + 1} de ${columnasOriginales.length} columnas | X e Y se agregan al final.
-        `;
-        document.getElementById('trimmingInfo').style.background = 'var(--st-amarillo-claro)';
-      } else {
-        document.getElementById('trimmingInfo').textContent = `Todas las columnas activas (${columnasOriginales.length}) + X + Y`;
-        document.getElementById('trimmingInfo').style.background = 'var(--st-blanco)';
-      }
-      
-      // Encabezados tabla
-      const headerRow = document.getElementById('previewHeader');
-      headerRow.innerHTML = '';
-      encabezados.forEach(col => {
-        const th = document.createElement('th');
-        th.textContent = col.trim();
-        th.style.fontSize = 'var(--st-text-xs)';
-        th.style.whiteSpace = 'nowrap';
-        headerRow.appendChild(th);
-      });
-      
-      // Primeras 10 filas
-      const bodyElement = document.getElementById('previewBody');
-      bodyElement.innerHTML = '';
-      const filasAMostrar = Math.min(10, lineas.length - 1);
-      
-      for (let i = 1; i <= filasAMostrar; i++) {
-        const valores = lineas[i].split(';');
-        const tr = document.createElement('tr');
-        
-        valores.forEach((val, idx) => {
-          const td = document.createElement('td');
-          // Limpiar entrecomillado si lo tiene
-          let displayVal = val.replace(/^"|"$/g, '');
-          
-          // Resaltar X e Y
-          if (idx === numColumnas - 2 || idx === numColumnas - 1) {
-            td.style.fontWeight = '700';
-            td.style.backgroundColor = 'var(--st-amarillo-tenue)';
-          }
-          
-          td.textContent = displayVal;
-          td.style.fontSize = 'var(--st-text-xs)';
-          td.style.whiteSpace = 'nowrap';
-          tr.appendChild(td);
-        });
-        
-        bodyElement.appendChild(tr);
-      }
-      
-      // Mostrar modal
-      document.getElementById('modalPreview').style.display = 'flex';
-      document.getElementById('modalPreview').style.alignItems = 'flex-start';
-      document.getElementById('modalPreview').style.justifyContent = 'center';
-    }
-
-    function actualizarVistaPrevia() {
-      // Si la modal está abierta, actualizar previsualización
-      if (document.getElementById('modalPreview').style.display !== 'none') {
-        mostrarPreviewCSV();
-      }
-    }
-    
     function descargarCSV() {
       const formato = document.getElementById('formatoDecimal').value;
       let csv = generarCSV(formato);
@@ -1171,48 +851,29 @@
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      // Cerrar modal
-      document.getElementById('modalPreview').style.display = 'none';
     }
 
     function generarCSV(formato = 'coma') {
       if (!datosProcessados.length) return '';
-      
-      // ✅ Aplicar trimming si está activo
-      let columnasAExportar = [...columnasOriginales];
-      if (columnasTrimmingIndex >= 0 && columnasTrimmingIndex < columnasOriginales.length) {
-        columnasAExportar = columnasOriginales.slice(0, columnasTrimmingIndex + 1);
-      }
-      
-      // Agregar X e Y al final
-      const todasLasColumnas = [...columnasAExportar, 'X', 'Y'];
-      
+      const todasLasColumnas = [...columnasOriginales, 'X', 'Y'];
       let csv = todasLasColumnas.join(';') + '\n';
       
-      datosProcessados.forEach((filaProcesada, idx) => {
+      datosProcessados.forEach(fila => {
         const valores = todasLasColumnas.map(header => {
-          let valor = '';
+          let valor = fila[header] || '';
           
-          if (header === 'X') {
-            valor = filaProcesada['X'] || '';
-          } else if (header === 'Y') {
-            valor = filaProcesada['Y'] || '';
-          } else {
-            valor = filaProcesada[header] || '';
-          }
-          
-          // Limpiar saltos de línea
-          valor = String(valor)
-            .replace(/[\r\n\t]/g, ' ')
-            .replace(/\s+/g, ' ')
+          // ✅ LIMPIEZA AGRESIVA de caracteres problemáticos en TODOS los campos
+          valor = valor
+            .replace(/[\r\n\t]+/g, ' ')    // Saltos de línea/tabs → espacio
+            .replace(/\s+/g, ' ')          // Espacios múltiples → uno
             .trim();
           
-          // Convertir formato decimal SOLO para X e Y
+          // Convertir formato decimal para X e Y
           if (header === 'X' || header === 'Y') {
             if (formato === 'coma') {
-              valor = valor.replace(/\./g, ',');
+              valor = valor.replace('.', ',');  // Punto a coma
             } else {
-              valor = valor.replace(/,/g, '.');
+              valor = valor.replace(',', '.');  // Coma a punto
             }
           }
           
@@ -1223,10 +884,8 @@
           
           return valor;
         });
-        
         csv += valores.join(';') + '\n';
       });
-      
       return csv;
     }
 
@@ -1236,52 +895,10 @@
       modoSeleccionado = null;
       formatoDetectado = null;
       columnasOriginales = [];
-      columnasTrimmingIndex = -1;
       fileInput.value = '';
       document.getElementById('previewInitialSection').classList.add('hidden');
       document.getElementById('configSection').classList.add('hidden');
       document.getElementById('previewSection').classList.add('hidden');
-    }
-    
-    // ✅ FUNCIONES DE TRIMMING
-    function aplicarTrimmingEnPreview() {
-      const selectColumnas = document.getElementById('ultimaColumnaValida');
-      if (!selectColumnas.value) return;
-      
-      columnasTrimmingIndex = parseInt(selectColumnas.value);
-      const colsAMantener = columnasTrimmingIndex + 1;
-      const colsEliminadas = columnasOriginales.length - colsAMantener;
-      
-      if (colsEliminadas > 0) {
-        document.getElementById('trimmingInfo').innerHTML = `
-          ✂️ <strong>${colsEliminadas} columnas eliminadas.</strong> 
-          Usando: ${colsAMantener} de ${columnasOriginales.length} columnas | X e Y se agregan al final.
-        `;
-        document.getElementById('trimmingInfo').style.background = 'var(--st-amarillo-claro)';
-      } else {
-        document.getElementById('trimmingInfo').innerHTML = `
-          Sin cambios. Usando todas las columnas.
-        `;
-        document.getElementById('trimmingInfo').style.background = 'var(--st-blanco)';
-      }
-      
-      // Actualizar preview
-      mostrarPreviewCSV();
-    }
-    
-    function resetearTrimmingEnPreview() {
-      columnasTrimmingIndex = -1;
-      const selectColumnas = document.getElementById('ultimaColumnaValida');
-      if (selectColumnas) {
-        selectColumnas.value = columnasOriginales.length - 1;
-      }
-      document.getElementById('trimmingInfo').innerHTML = `
-        Todas las columnas activas (${columnasOriginales.length})
-      `;
-      document.getElementById('trimmingInfo').style.background = 'var(--st-blanco)';
-      
-      // Actualizar preview
-      mostrarPreviewCSV();
     }
   </script>
 
